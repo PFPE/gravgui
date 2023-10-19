@@ -1130,8 +1130,8 @@ void on_compute_bias(GtkWidget *button, gpointer data) {
     tie* gravtie = static_cast<tie*>(data);  // we def need the whole tie for this one
     std::vector<float> heights;  // get all heights and timestamps for water grav calc
     std::vector<time_t> height_stamps;
-    double water_grav;
-    double avg_dgs_grav;
+    double water_grav = -999;
+    double avg_dgs_grav = -999;
     double pier_grav;
 
     if (debug_dgs && gravtie->shinfo.gravgrav.size() == 0) return;
@@ -1257,7 +1257,6 @@ void on_compute_bias(GtkWidget *button, gpointer data) {
                 gravsum += value;
             }
             avg_dgs_grav = gravsum/result.size();
-            gravtie->avg_dgs_grav = avg_dgs_grav;
 
         } else {  // TODO hightlight something? DGS load button?
             //std::cout << "no data coverage!" << std::endl;
@@ -1268,6 +1267,8 @@ void on_compute_bias(GtkWidget *button, gpointer data) {
     // calculate! save in tie! put value in a label somewhere so it is visible before save?
     double bias = water_grav - avg_dgs_grav;
     gravtie->bias = bias;
+    gravtie->avg_dgs_grav = avg_dgs_grav;
+    gravtie->water_grav = water_grav;
     char bstring[30];
     sprintf(bstring,"Computed bias: %.2f", bias);
     gtk_label_set_text(GTK_LABEL(gravtie->bias_label), bstring);

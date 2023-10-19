@@ -161,7 +161,7 @@ Filter::designBlackman()
 {
         int n;
         double current_window[m_num_taps];
-        double tapsum;
+        double tapsum = 0.;
         blackman(current_window, m_num_taps, false);
         for (n=0; n<m_num_taps; n++){
             tapsum = tapsum + current_window[n];
