@@ -114,10 +114,7 @@ struct tie {  // struct for holding an entire tie!
     GtkWidget *landtoggle; 
     GtkWidget *lt_button;
     //bool metric;  // might not use this? can we make everyone use meters?
-    //std::vector<val_time> heightvals{3};
-    val_time h1;  // pier water heights, timestamped
-    val_time h2;
-    val_time h3;
+    std::vector<val_time> heights{3}; // pier water heights, timestamped
     val_time a1;  // these are only used for a land tie
     val_time a2;
     val_time a3;
@@ -403,9 +400,8 @@ void tie_to_toml(const std::string& filepath, tie* gravtie) {
     outputFile << "avg_dgs_grav=" << std::fixed << std::setprecision(2) << gravtie->avg_dgs_grav<< std::endl;
     outputFile << "drift=" << std::fixed << std::setprecision(2) << gravtie->drift<< std::endl;
 
-    std::vector<val_time> hcounts{gravtie->h1, gravtie->h2, gravtie->h3};
     int num = 1;
-    for (const val_time& thisone : hcounts) {
+    for (const val_time& thisone : gravtie->heights) {
         outputFile << "h" << num << ".h=" << std::fixed << std::setprecision(2) << thisone.h1 << std::endl;
         struct tm* timeinfo;
         timeinfo = gmtime(&thisone.t1);
@@ -496,9 +492,9 @@ void toml_to_tie(const std::string& filePath, tie* gravtie) {
                 if (key=="c2.m") gravtie->c2.m1 = std::stof(value);
                 if (key=="c3.m") gravtie->c3.m1 = std::stof(value);
 
-                if (key=="h1.h") gravtie->h1.h1 = std::stof(value);
-                if (key=="h2.h") gravtie->h2.h1 = std::stof(value);
-                if (key=="h3.h") gravtie->h3.h1 = std::stof(value);
+                if (key=="h1.h") gravtie->heights[0].h1 = std::stof(value);
+                if (key=="h2.h") gravtie->heights[1].h1 = std::stof(value);
+                if (key=="h3.h") gravtie->heights[2].h1 = std::stof(value);
 
                 // key matchups for timestamps: the most annoying part
                 if (key.substr(2,4)==".t"){
@@ -514,9 +510,9 @@ void toml_to_tie(const std::string& filePath, tie* gravtie) {
                         if (key.substr(0,2)=="c1") gravtie->c1.t1 = outtime;
                         if (key.substr(0,2)=="c2") gravtie->c2.t1 = outtime;
                         if (key.substr(0,2)=="c3") gravtie->c3.t1 = outtime;
-                        if (key.substr(0,2)=="h1") gravtie->h1.t1 = outtime;
-                        if (key.substr(0,2)=="h2") gravtie->h2.t1 = outtime;
-                        if (key.substr(0,2)=="h3") gravtie->h3.t1 = outtime;
+                        if (key.substr(0,2)=="h1") gravtie->heights[0].t1 = outtime;
+                        if (key.substr(0,2)=="h2") gravtie->heights[1].t1 = outtime;
+                        if (key.substr(0,2)=="h3") gravtie->heights[2].t1 = outtime;
                     }
                 }
             }
@@ -628,8 +624,7 @@ void toml_to_tie(const std::string& filePath, tie* gravtie) {
     std::vector<val_time> acounts{gravtie->a1, gravtie->a2, gravtie->a3};
     std::vector<val_time> bcounts{gravtie->b1, gravtie->b2, gravtie->b3};
     std::vector<val_time> ccounts{gravtie->c1, gravtie->c2, gravtie->c3};
-    std::vector<val_time> hcounts{gravtie->h1, gravtie->h2, gravtie->h3};
-    std::vector<std::vector<val_time>> allcounts{acounts, bcounts, ccounts, hcounts};
+    std::vector<std::vector<val_time>> allcounts{acounts, bcounts, ccounts, gravtie->heights};
     for (std::vector<val_time>& thesecounts : allcounts) {
         for (val_time& thisone : thesecounts) {
             if (thisone.h1 > 0) {
@@ -1141,28 +1136,28 @@ void on_compute_bias(GtkWidget *button, gpointer data) {
 
     if (debug_dgs && gravtie->shinfo.gravgrav.size() == 0) return;
 
-    if (gravtie->h1.h1 != -999) {
-        heights.push_back(-1*std::abs(gravtie->h1.h1));  // all heights should be negative numbers
+    if (gravtie->heights[0].h1 != -999) {
+        heights.push_back(-1*std::abs(gravtie->heights[0].h1));  // all heights should be negative numbers
         if (debug_dgs) {
             height_stamps.push_back(gravtie->shinfo.gravtime[2000]); // kludge for timestamps from file
         } else {
-            height_stamps.push_back(gravtie->h1.t1);
+            height_stamps.push_back(gravtie->heights[0].t1);
         }
     }
-    if (gravtie->h2.h1 != -999) {
-        heights.push_back(-1*std::abs(gravtie->h2.h1));
+    if (gravtie->heights[1].h1 != -999) {
+        heights.push_back(-1*std::abs(gravtie->heights[1].h1));
         if (debug_dgs) {
             height_stamps.push_back(gravtie->shinfo.gravtime[3000]);
         } else {
-            height_stamps.push_back(gravtie->h2.t1);
+            height_stamps.push_back(gravtie->heights[1].t1);
         }
     }
-    if (gravtie->h3.h1 != -999) {
-        heights.push_back(-1*std::abs(gravtie->h3.h1));
+    if (gravtie->heights[2].h1 != -999) {
+        heights.push_back(-1*std::abs(gravtie->heights[2].h1));
         if (debug_dgs) {
             height_stamps.push_back(gravtie->shinfo.gravtime[4000]);
         } else {
-            height_stamps.push_back(gravtie->h3.t1);
+            height_stamps.push_back(gravtie->heights[2].t1);
         }
     }
     // check for land tie if we are using one
@@ -1254,7 +1249,7 @@ void on_compute_bias(GtkWidget *button, gpointer data) {
 
             // now from filtered series, get the slice of grav data that we will average here
             // (indices were caluclated before to figure out ntaps)
-            std::vector<float> result(secondtrim.begin() + lower_index, secondtrim.begin() + upper_index);
+            std::vector<double> result(secondtrim.begin() + lower_index, secondtrim.begin() + upper_index);
 
             // average the filtered and sliced data to get the avg gravity for the bias calc
             double gravsum = 0.0;
@@ -1741,9 +1736,9 @@ int main(int argc, char *argv[]) {
     gtk_grid_attach(GTK_GRID(grid), e_h2, 4, 6, 2, 1);
     gtk_grid_attach(GTK_GRID(grid), e_h3, 4, 7, 2, 1);
     // add heights and counts entries to the tie struct so we can manipulate them in callbacks
-    gravtie.h1.en1 = e_h1;
-    gravtie.h2.en1 = e_h2;
-    gravtie.h3.en1 = e_h3;
+    gravtie.heights[0].en1 = e_h1;
+    gravtie.heights[1].en1 = e_h2;
+    gravtie.heights[2].en1 = e_h3;
 
     // buttons
     GtkWidget *b_h1 = gtk_button_new_with_label("save h1");
@@ -1759,16 +1754,16 @@ int main(int argc, char *argv[]) {
     gtk_grid_attach(GTK_GRID(grid), b_rh2, 7, 6, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), b_rh3, 7, 7, 1, 1);
     // connect save and reset buttons to callbacks, for water heights
-    g_signal_connect(b_h1, "clicked", G_CALLBACK(on_timestamp_button), &gravtie.h1);
-    g_signal_connect(b_h2, "clicked", G_CALLBACK(on_timestamp_button), &gravtie.h2);
-    g_signal_connect(b_h3, "clicked", G_CALLBACK(on_timestamp_button), &gravtie.h3);
-    g_signal_connect(b_rh1, "clicked", G_CALLBACK(on_reset_button), &gravtie.h1);
-    g_signal_connect(b_rh2, "clicked", G_CALLBACK(on_reset_button), &gravtie.h2);
-    g_signal_connect(b_rh3, "clicked", G_CALLBACK(on_reset_button), &gravtie.h3);
+    g_signal_connect(b_h1, "clicked", G_CALLBACK(on_timestamp_button), &gravtie.heights[0]);
+    g_signal_connect(b_h2, "clicked", G_CALLBACK(on_timestamp_button), &gravtie.heights[1]);
+    g_signal_connect(b_h3, "clicked", G_CALLBACK(on_timestamp_button), &gravtie.heights[2]);
+    g_signal_connect(b_rh1, "clicked", G_CALLBACK(on_reset_button), &gravtie.heights[0]);
+    g_signal_connect(b_rh2, "clicked", G_CALLBACK(on_reset_button), &gravtie.heights[1]);
+    g_signal_connect(b_rh3, "clicked", G_CALLBACK(on_reset_button), &gravtie.heights[2]);
     // add save buttons to gravtie to manipulate in callbacks
-    gravtie.h1.bt1 = b_h1;
-    gravtie.h2.bt1 = b_h2;
-    gravtie.h3.bt1 = b_h3;
+    gravtie.heights[0].bt1 = b_h1;
+    gravtie.heights[1].bt1 = b_h2;
+    gravtie.heights[2].bt1 = b_h3;
 
 
     // COUNTS (LAND TIE) /////////////////////////////////////////////////////////
