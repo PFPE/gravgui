@@ -16,9 +16,8 @@ The file `example.toml` shows the format of a tie that has been written out from
 
 ## TODO
 docs
+buffer lengths for putting values back into entry fields need to be smaller/tuned
 actions build binaries
-cal table label to show something has been read
-landtie value label to show it has been computed
 option for manual timestamp entry
 writing ties to report format (and/or to tex?)
 convert some floats to doubles

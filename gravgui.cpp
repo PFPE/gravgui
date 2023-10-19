@@ -102,6 +102,8 @@ struct lm_info { // name, brackets, factors, offsets for calibration of landmete
     GtkWidget *bt_cal_file;  // file dialog button for other calibration file
     GtkWidget *cb1;  // combo box ie dropdown
     GtkWidget *lts;  // toggle switch
+    GtkWidget *cal_label; // label for cal table read
+    GtkWidget *lt_label; // label for calculated land tie val
 };
 
 struct tie {  // struct for holding an entire tie!
@@ -642,6 +644,12 @@ void toml_to_tie(const std::string& filePath, tie* gravtie) {
         sprintf(bstring,"Computed bias: %.2f", gravtie->bias);
         gtk_label_set_text(GTK_LABEL(gravtie->bias_label), bstring);
     }
+    // and similar for land tie value if any
+    if (gravtie->lminfo.land_tie_value>0) {
+        char bstring[40];
+        sprintf(bstring,"Land tie value: %.2f", gravtie->lminfo.land_tie_value);
+        gtk_label_set_text(GTK_LABEL(gravtie->lminfo.lt_label), bstring);
+    }
 
     return;
 }
@@ -938,6 +946,9 @@ void on_lm_save(GtkWidget *widget, gpointer data) {
                 }
             }
         }
+        char buffer[40]; // Adjust size?
+        snprintf(buffer, sizeof(buffer), "%i calibration lines read", (int) lminfo->calib.brackets.size());
+        gtk_label_set_text(GTK_LABEL(lminfo->cal_label), buffer); 
     }
 }
 
@@ -962,6 +973,8 @@ void on_lm_reset(GtkWidget *widget, gpointer data) {
     // reset buttons to on and off as needed
     gtk_widget_set_sensitive(GTK_WIDGET(lminfo->bt1), TRUE);
     gtk_widget_set_sensitive(GTK_WIDGET(lminfo->bt_cal_file), FALSE);
+    // reset text in grid
+    gtk_label_set_text(GTK_LABEL(lminfo->cal_label), "0 calibration lines read");
 }
 
 static void on_lm_filebrowse_clicked(GtkWidget *button, gpointer data) {
@@ -993,7 +1006,10 @@ static void on_lm_filebrowse_clicked(GtkWidget *button, gpointer data) {
         lminfo->cal_file_path = sf;
     }
     gtk_widget_destroy(file_chooser);
-    std::cout << lminfo->calib.brackets.size() << std::endl;
+    //std::cout << lminfo->calib.brackets.size() << std::endl;
+    char buffer[40]; // Adjust size?
+    snprintf(buffer, sizeof(buffer), "%i calibration lines read", (int) lminfo->calib.brackets.size());
+    gtk_label_set_text(GTK_LABEL(lminfo->cal_label), buffer); 
 
 }
 
@@ -1319,6 +1335,10 @@ void on_compute_landtie(GtkWidget *button, gpointer data) {
     double land_tie_value = ref_g + gdiff;
     gravtie->lminfo.land_tie_value = land_tie_value;
     gravtie->drift = drift;
+
+    char buffer[40]; // Adjust size?
+    snprintf(buffer, sizeof(buffer), "Land tie value: %.2f", land_tie_value);
+    gtk_label_set_text(GTK_LABEL(gravtie->lminfo.lt_label), buffer); 
 }
 
 // callback function for land tie toggle switch: bool, active/inactive
@@ -1688,9 +1708,14 @@ int main(int argc, char *argv[]) {
     GtkWidget *b_resetlm = gtk_button_new_with_label("Reset meter");
     g_signal_connect(b_resetlm, "clicked", G_CALLBACK(on_lm_reset), &gravtie.lminfo);
     gtk_grid_attach(GTK_GRID(grid), b_resetlm, 7, 4, 1, 1);
-    GtkWidget *b_lmcalfile = gtk_button_new_with_label("Other cal. file");  // TODO
+    GtkWidget *b_lmcalfile = gtk_button_new_with_label("Other cal. file");
     gtk_grid_attach(GTK_GRID(grid), b_lmcalfile, 8, 4, 1, 1);
     g_signal_connect(b_lmcalfile, "clicked", G_CALLBACK(on_lm_filebrowse_clicked), &gravtie.lminfo);
+    GtkWidget *cal_label = gtk_label_new("0 calibration lines read");
+    gtk_label_set_line_wrap(GTK_LABEL(cal_label), TRUE);
+    gtk_label_set_xalign(GTK_LABEL(cal_label), 0.0);
+    gtk_grid_attach(GTK_GRID(grid), cal_label, 9, 4, 1, 1);
+    gravtie.lminfo.cal_label = cal_label;
 
     gravtie.lminfo.en1 = e_otherlm;
     gravtie.lminfo.bt1 = b_savelm;
@@ -1917,6 +1942,11 @@ int main(int argc, char *argv[]) {
     g_signal_connect(G_OBJECT(landtie_switch), "state-set", G_CALLBACK(landtie_switch_callback), &gravtie);
     gtk_grid_attach(GTK_GRID(grid), landtie_label, 0, 3, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), landtie_switch, 1, 3, 1, 1);
+
+    GtkWidget *ltval_label = gtk_label_new("Land tie value: ");
+    gtk_label_set_xalign(GTK_LABEL(ltval_label), 0.0);  // right-justify the text
+    gravtie.lminfo.lt_label = ltval_label;
+    gtk_grid_attach(GTK_GRID(grid), ltval_label, 2, 14, 1, 1);
 
     // IMPERIAL/METRIC TOGGLE SWITCH TODO //////////////////////////////
 
