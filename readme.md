@@ -21,7 +21,6 @@ option for manual timestamp entry?
 writing ties to report format (and/or to tex?)
 convert some floats to doubles
 reorganize tie struct with vectors for a/b/c/h
-landtie on/off with save buttons for fields if already filled
 
 ### would be nice someday
 make sure -999s are all ok

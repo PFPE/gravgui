@@ -1358,34 +1358,20 @@ static void landtie_switch_callback(GtkSwitch *switch_widget, gboolean state, gp
     tie* gravtie = static_cast<tie*>(data);
     if (state) {
         gravtie->lminfo.landtie = TRUE;
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->a1.en1), TRUE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->a2.en1), TRUE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->a3.en1), TRUE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->b1.en1), TRUE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->b2.en1), TRUE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->b3.en1), TRUE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->c1.en1), TRUE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->c2.en1), TRUE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->c3.en1), TRUE);
 
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->a1.bt1), TRUE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->a2.bt1), TRUE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->a3.bt1), TRUE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->b1.bt1), TRUE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->b2.bt1), TRUE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->b3.bt1), TRUE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->c1.bt1), TRUE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->c2.bt1), TRUE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->c3.bt1), TRUE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->a1.bt2), TRUE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->a2.bt2), TRUE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->a3.bt2), TRUE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->b1.bt2), TRUE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->b2.bt2), TRUE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->b3.bt2), TRUE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->c1.bt2), TRUE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->c2.bt2), TRUE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->c3.bt2), TRUE);
+        std::vector<val_time> acounts{gravtie->a1, gravtie->a2, gravtie->a3};
+        std::vector<val_time> bcounts{gravtie->b1, gravtie->b2, gravtie->b3};
+        std::vector<val_time> ccounts{gravtie->c1, gravtie->c2, gravtie->c3};
+        std::vector<std::vector<val_time>> allcounts{acounts, bcounts, ccounts};
+        for (std::vector<val_time>& thesecounts : allcounts) {
+            for (val_time& thisone : thesecounts) {
+                gtk_widget_set_sensitive(GTK_WIDGET(thisone.bt2), TRUE);  // turn on all reset buttons
+                if (thisone.h1 < 0) { // only turn on entry field and save for un-filled fields
+                    gtk_widget_set_sensitive(GTK_WIDGET(thisone.en1), TRUE);
+                    gtk_widget_set_sensitive(GTK_WIDGET(thisone.bt1), TRUE);
+                }
+            }
+        }
 
         gtk_widget_set_sensitive(GTK_WIDGET(gravtie->lt_button), TRUE);
         gtk_widget_set_sensitive(GTK_WIDGET(gravtie->lminfo.bt2), TRUE);
@@ -1395,34 +1381,18 @@ static void landtie_switch_callback(GtkSwitch *switch_widget, gboolean state, gp
         }
     } else {
         gravtie->lminfo.landtie = FALSE;
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->a1.en1), FALSE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->a2.en1), FALSE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->a3.en1), FALSE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->b1.en1), FALSE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->b2.en1), FALSE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->b3.en1), FALSE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->c1.en1), FALSE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->c2.en1), FALSE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->c3.en1), FALSE);
 
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->a1.bt1), FALSE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->a2.bt1), FALSE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->a3.bt1), FALSE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->b1.bt1), FALSE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->b2.bt1), FALSE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->b3.bt1), FALSE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->c1.bt1), FALSE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->c2.bt1), FALSE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->c3.bt1), FALSE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->a1.bt2), FALSE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->a2.bt2), FALSE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->a3.bt2), FALSE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->b1.bt2), FALSE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->b2.bt2), FALSE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->b3.bt2), FALSE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->c1.bt2), FALSE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->c2.bt2), FALSE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->c3.bt2), FALSE);
+        std::vector<val_time> acounts{gravtie->a1, gravtie->a2, gravtie->a3};
+        std::vector<val_time> bcounts{gravtie->b1, gravtie->b2, gravtie->b3};
+        std::vector<val_time> ccounts{gravtie->c1, gravtie->c2, gravtie->c3};
+        std::vector<std::vector<val_time>> allcounts{acounts, bcounts, ccounts};
+        for (std::vector<val_time>& thesecounts : allcounts) {
+            for (val_time& thisone : thesecounts) {
+                gtk_widget_set_sensitive(GTK_WIDGET(thisone.bt2), FALSE);
+                gtk_widget_set_sensitive(GTK_WIDGET(thisone.en1), FALSE);
+                gtk_widget_set_sensitive(GTK_WIDGET(thisone.bt1), FALSE);
+            }
+        }
 
         gtk_widget_set_sensitive(GTK_WIDGET(gravtie->lt_button), FALSE);
         gtk_widget_set_sensitive(GTK_WIDGET(gravtie->lminfo.cb1), FALSE);
