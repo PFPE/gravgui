@@ -1,0 +1,16 @@
+[SHIPS]
+N_SHIPS=13
+SHIP_1_NAME="R/V Knorr"
+SHIP_2_NAME="R/V Atlantis"
+SHIP_3_NAME="R/V Langseth"
+SHIP_4_NAME="R/V Revelle"
+SHIP_5_NAME="R/V Melville"
+SHIP_6_NAME="R/V Palmer"
+SHIP_7_NAME="R/V Falkor"
+SHIP_8_NAME="R/V Thompson"
+SHIP_9_NAME="R/V Kilo Moana"
+SHIP_10_NAME="R/V Sikuliaq"
+SHIP_11_NAME="R/V Healy"
+SHIP_12_NAME="CCGS LSSL"
+SHIP_13_NAME="R/V Armstrong"
+SHIP_14_NAME="Other"

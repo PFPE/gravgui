@@ -1,0 +1,3 @@
+gcc  -I. -c window_functions.c
+g++ -O3 -I. -c filt.cpp
+g++ -O3 -I. gravgui.cpp filt.o window_functions.o -lm $(pkg-config --cflags --libs gtk+-3.0) -o gravgui

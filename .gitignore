@@ -1,0 +1,6 @@
+*.o
+.*swp
+old/*
+test*.toml
+# do not track the executable from local
+gravgui
