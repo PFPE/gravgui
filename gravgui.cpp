@@ -579,7 +579,10 @@ void toml_to_tie(const std::string& filePath, tie* gravtie) {
         gtk_widget_set_sensitive(GTK_WIDGET(gravtie->stinfo.cb1), FALSE);
     }
     if (gravtie->stinfo.station_gravity>0) {
-        char buffer[20]; // Adjust size?
+        std::stringstream strm;
+        strm << std::fixed << std::setprecision(2) << gravtie->stinfo.station_gravity;
+        std::string test = strm.str();
+        char buffer[test.length()]; // Adjust size?
         snprintf(buffer, sizeof(buffer), "%.2f", gravtie->stinfo.station_gravity);
         gtk_entry_set_text(GTK_ENTRY(gravtie->stinfo.en2), buffer);
         gtk_widget_set_sensitive(GTK_WIDGET(gravtie->stinfo.en2), FALSE);
@@ -630,7 +633,10 @@ void toml_to_tie(const std::string& filePath, tie* gravtie) {
     for (std::vector<val_time>& thesecounts : allcounts) {
         for (val_time& thisone : thesecounts) {
             if (thisone.h1 > 0) {
-                char buffbuff[10];
+                std::stringstream strm;
+                strm << std::fixed << std::setprecision(2) << thisone.h1;
+                std::string test = strm.str();
+                char buffbuff[test.length()];
                 snprintf(buffbuff, sizeof(buffbuff), "%.2f", thisone.h1);
                 gtk_entry_set_text(GTK_ENTRY(thisone.en1),buffbuff);
                 gtk_widget_set_sensitive(GTK_WIDGET(thisone.en1), FALSE);
@@ -640,13 +646,19 @@ void toml_to_tie(const std::string& filePath, tie* gravtie) {
     }
     // computed bias if there is any
     if (gravtie->bias>0) {
-        char bstring[30];
+        std::stringstream strm;
+        strm << std::fixed << std::setprecision(2) << gravtie->bias;
+        std::string test = strm.str();
+        char bstring[test.length()+16];
         sprintf(bstring,"Computed bias: %.2f", gravtie->bias);
         gtk_label_set_text(GTK_LABEL(gravtie->bias_label), bstring);
     }
     // and similar for land tie value if any
     if (gravtie->lminfo.land_tie_value>0) {
-        char bstring[40];
+        std::stringstream strm;
+        strm << std::fixed << std::setprecision(2) << gravtie->lminfo.land_tie_value;
+        std::string test = strm.str();
+        char bstring[test.length()+17];
         sprintf(bstring,"Land tie value: %.2f", gravtie->lminfo.land_tie_value);
         gtk_label_set_text(GTK_LABEL(gravtie->lminfo.lt_label), bstring);
     }
@@ -1945,6 +1957,7 @@ int main(int argc, char *argv[]) {
 
     GtkWidget *ltval_label = gtk_label_new("Land tie value: ");
     gtk_label_set_xalign(GTK_LABEL(ltval_label), 0.0);  // right-justify the text
+    gtk_label_set_line_wrap(GTK_LABEL(ltval_label), TRUE);
     gravtie.lminfo.lt_label = ltval_label;
     gtk_grid_attach(GTK_GRID(grid), ltval_label, 2, 14, 1, 1);
 
@@ -1975,6 +1988,7 @@ int main(int argc, char *argv[]) {
     // COMPUTE BIAS ////////////////////////////////////////////////////////
     GtkWidget *bias_label = gtk_label_new("Computed bias: ");
     gtk_label_set_xalign(GTK_LABEL(bias_label), 0.0);  // left-justify the text
+    gtk_label_set_line_wrap(GTK_LABEL(bias_label), TRUE);
     gtk_grid_attach(GTK_GRID(grid), bias_label, 10, 13, 2, 1);
     gravtie.bias_label = bias_label;
     GtkWidget *b_bias = gtk_button_new_with_label("compute bias");

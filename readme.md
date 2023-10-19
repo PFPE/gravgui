@@ -16,12 +16,12 @@ The file `example.toml` shows the format of a tie that has been written out from
 
 ## TODO
 docs
-buffer lengths for putting values back into entry fields need to be smaller/tuned
 actions build binaries
-option for manual timestamp entry
+option for manual timestamp entry?
 writing ties to report format (and/or to tex?)
 convert some floats to doubles
 reorganize tie struct with vectors for a/b/c/h
+landtie on/off with save buttons for fields if already filled
 
 ### would be nice someday
 make sure -999s are all ok
