@@ -50,6 +50,7 @@ struct val_time { // struct for holding number(s) with timestamp
 
 struct ship_info { // struct for ship name, buttons, dgs data, etc
     std::string ship="";
+    std::string alt_ship="";
     std::vector<float> gravgrav;
     std::vector<time_t> gravtime;
     GtkWidget *dgs_label;  // show #entries in vecs
@@ -355,6 +356,7 @@ void tie_to_toml(const std::string& filepath, tie* gravtie) {
     // go through all the (known) components of tie, write them out
     outputFile << "[SHIP]" << std::endl;
     outputFile << "ship_name=\"" << gravtie->shinfo.ship << "\""<< std::endl;
+    outputFile << "alt_ship_name=\"" << gravtie->shinfo.alt_ship << "\""<< std::endl;
     outputFile << std::endl;
 
     
@@ -451,6 +453,7 @@ void toml_to_tie(const std::string& filePath, tie* gravtie) {
                 }
                 // key matchups: strings first bc they are easy
                 if (key=="ship_name") gravtie->shinfo.ship = value;
+                if (key=="alt_ship_name") gravtie->shinfo.alt_ship = value;
                 if (key=="station_name") gravtie->stinfo.station = value;
                 if (key=="alt_station_name") gravtie->stinfo.alt_station = value;
                 if (key=="meter") gravtie->lminfo.meter = value;
@@ -521,7 +524,11 @@ void toml_to_tie(const std::string& filePath, tie* gravtie) {
     // now, set all the gui fields and buttons appropriately based on what got read into the tie
     // ship: cb, en, save button
     if (gravtie->shinfo.ship!="") {
-        gtk_entry_set_text(GTK_ENTRY(gravtie->shinfo.en1),gravtie->shinfo.ship.c_str());
+        if (gravtie->shinfo.ship=="Other") {
+            gtk_entry_set_text(GTK_ENTRY(gravtie->shinfo.en1),gravtie->shinfo.alt_ship.c_str());
+        } else {
+            gtk_entry_set_text(GTK_ENTRY(gravtie->shinfo.en1),gravtie->shinfo.ship.c_str());
+        }
         gtk_widget_set_sensitive(GTK_WIDGET(gravtie->shinfo.bt1), FALSE);
 
         GtkTreeModel *shipmodel = gtk_combo_box_get_model(GTK_COMBO_BOX(gravtie->shinfo.cb1));
@@ -684,7 +691,7 @@ void on_ship_save(GtkWidget *widget, gpointer data) {
             // if there is text in the entry, save it, lock entry and save button
             std::string othertext = text;  // cast to string
             if (othertext != "") {  // there is something in the box!
-                shinfo->ship = othertext;
+                shinfo->alt_ship = othertext;
                 gtk_widget_set_sensitive(GTK_WIDGET(shinfo->en1), FALSE);
                 gtk_widget_set_sensitive(GTK_WIDGET(shinfo->bt1), FALSE);
             } // if nothing in the box, save does nothing
@@ -705,6 +712,7 @@ void on_ship_reset(GtkWidget *widget, gpointer data) {
     gtk_combo_box_set_active(GTK_COMBO_BOX(shinfo->cb1), -1);
     // clear shinfo.ship
     shinfo->ship = "";
+    shinfo->alt_ship = "";
     // reset buttons to on
     gtk_widget_set_sensitive(GTK_WIDGET(shinfo->bt1), TRUE);
 }

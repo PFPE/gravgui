@@ -1,5 +1,6 @@
 [SHIP]
 ship_name="R/V Langseth"
+alt_ship_name=""
 # note that DGS data is not saved with tie, nor is filepath to data if any has been read
 
 [STATION]
