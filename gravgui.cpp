@@ -26,9 +26,6 @@ bool debug_dgs = true;
 // this will set up a kludge-y thing where the timestamps for entered water heights
 // are replaced with values pulled from whatever DGS file is imported
 // it assumes that dgs file has at least 4000 values (preferably lots more)
-// Note that with this test setup some data *must* be loaded before trying to 
-// compute bias. Otherwise pressing that button will throw a seg fault
-// because the heights try to grab timestamps from a vector that is null
 
 ////////////////////////////////////////////////////////////////////////
 // constants, global bc why not
@@ -103,6 +100,7 @@ struct lm_info { // name, brackets, factors, offsets for calibration of landmete
     GtkWidget *bt2;  // reset button
     GtkWidget *bt_cal_file;  // file dialog button for other calibration file
     GtkWidget *cb1;  // combo box ie dropdown
+    GtkWidget *lts;  // toggle switch
 };
 
 struct tie {  // struct for holding an entire tie!
@@ -460,6 +458,12 @@ void toml_to_tie(const std::string& filePath, tie* gravtie) {
                 if (key=="cal_file_path") gravtie->lminfo.cal_file_path = value;
                 if (key=="personnel") gravtie->prinfo.personnel = value;
 
+                // key matchups for bools
+                if (key=="landtie") {
+                    if (value=="true") gravtie->lminfo.landtie=true;
+                    if (value=="false") gravtie->lminfo.landtie=false;
+                }
+
                 // key matchups for floats: stof-ing everything
                 if (key=="station_gravity") gravtie->stinfo.station_gravity = std::stof(value);
                 if (key=="land_tie_value") gravtie->lminfo.land_tie_value = std::stof(value);
@@ -514,6 +518,124 @@ void toml_to_tie(const std::string& filePath, tie* gravtie) {
         }
     }
     inputFile.close();
+    // now, set all the gui fields and buttons appropriately based on what got read into the tie
+    // ship: cb, en, save button
+    if (gravtie->shinfo.ship!="") {
+        gtk_entry_set_text(GTK_ENTRY(gravtie->shinfo.en1),gravtie->shinfo.ship.c_str());
+        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->shinfo.bt1), FALSE);
+
+        GtkTreeModel *shipmodel = gtk_combo_box_get_model(GTK_COMBO_BOX(gravtie->shinfo.cb1));
+        GtkTreeIter iter;
+        gboolean valid;
+        valid = gtk_tree_model_get_iter_first(shipmodel, &iter);
+        int countlines = 0;
+        while (valid) {
+            gchar *str_data;
+            gtk_tree_model_get(shipmodel, &iter, 0, &str_data, -1);
+            if (str_data == gravtie->shinfo.ship) {
+                break;
+            }
+            countlines++;
+            g_free(str_data);
+            valid = gtk_tree_model_iter_next(shipmodel, &iter);
+        }
+        gtk_combo_box_set_active(GTK_COMBO_BOX(gravtie->shinfo.cb1),countlines);
+        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->shinfo.cb1), FALSE);
+    }
+    // station: cb, en, save, absgrav, save2
+    if (gravtie->stinfo.station!="") {
+        if (gravtie->stinfo.station=="Other") {
+            gtk_entry_set_text(GTK_ENTRY(gravtie->stinfo.en1),gravtie->stinfo.alt_station.c_str());
+        } else {
+            gtk_entry_set_text(GTK_ENTRY(gravtie->stinfo.en1),gravtie->stinfo.station.c_str());
+        }
+        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->stinfo.bt1), FALSE);
+
+        GtkTreeModel *stamodel = gtk_combo_box_get_model(GTK_COMBO_BOX(gravtie->stinfo.cb1));
+        GtkTreeIter iter;
+        gboolean valid;
+        valid = gtk_tree_model_get_iter_first(stamodel, &iter);
+        int countlines = 0;
+        while (valid) {
+            gchar *str_data;
+            gtk_tree_model_get(stamodel, &iter, 0, &str_data, -1);
+            if (str_data == gravtie->stinfo.station) {
+                break;
+            }
+            countlines++;
+            g_free(str_data);
+            valid = gtk_tree_model_iter_next(stamodel, &iter);
+        }
+        gtk_combo_box_set_active(GTK_COMBO_BOX(gravtie->stinfo.cb1),countlines);
+        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->stinfo.cb1), FALSE);
+    }
+    if (gravtie->stinfo.station_gravity>0) {
+        char buffer[20]; // Adjust size?
+        snprintf(buffer, sizeof(buffer), "%.2f", gravtie->stinfo.station_gravity);
+        gtk_entry_set_text(GTK_ENTRY(gravtie->stinfo.en2), buffer);
+        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->stinfo.en2), FALSE);
+        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->stinfo.bt3), FALSE);
+    }
+    // personnel: en, save
+    if (gravtie->prinfo.personnel!=""){
+        gtk_entry_set_text(GTK_ENTRY(gravtie->prinfo.en1), gravtie->prinfo.personnel.c_str());
+        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->prinfo.en1), FALSE);
+        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->prinfo.bt1), FALSE);
+    }
+    // land tie toggle (note that callback for buttons does NOT work here)
+    if (gravtie->lminfo.landtie) gtk_switch_set_active(GTK_SWITCH(gravtie->lminfo.lts), TRUE);
+    // land meter
+    if (gravtie->lminfo.meter!="") {
+        if (gravtie->lminfo.meter=="Other") {
+            gtk_entry_set_text(GTK_ENTRY(gravtie->lminfo.en1),gravtie->lminfo.alt_meter.c_str());
+        } else {
+            gtk_entry_set_text(GTK_ENTRY(gravtie->lminfo.en1),gravtie->lminfo.meter.c_str());
+        }
+        // don't freeze the save meter button bc saving will read the cal file?
+        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->lminfo.bt1), TRUE);
+
+        GtkTreeModel *metmodel = gtk_combo_box_get_model(GTK_COMBO_BOX(gravtie->lminfo.cb1));
+        GtkTreeIter iter;
+        gboolean valid;
+        valid = gtk_tree_model_get_iter_first(metmodel, &iter);
+        int countlines = 0;
+        while (valid) {
+            gchar *str_data;
+            gtk_tree_model_get(metmodel, &iter, 0, &str_data, -1);
+            if (str_data == gravtie->lminfo.meter) {
+                break;
+            }
+            countlines++;
+            g_free(str_data);
+            valid = gtk_tree_model_iter_next(metmodel, &iter);
+        }
+        gtk_combo_box_set_active(GTK_COMBO_BOX(gravtie->lminfo.cb1),countlines);
+        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->lminfo.cb1), FALSE);
+    }
+    // a/b/c/h: values, saves
+    std::vector<val_time> acounts{gravtie->a1, gravtie->a2, gravtie->a3};
+    std::vector<val_time> bcounts{gravtie->b1, gravtie->b2, gravtie->b3};
+    std::vector<val_time> ccounts{gravtie->c1, gravtie->c2, gravtie->c3};
+    std::vector<val_time> hcounts{gravtie->h1, gravtie->h2, gravtie->h3};
+    std::vector<std::vector<val_time>> allcounts{acounts, bcounts, ccounts, hcounts};
+    for (std::vector<val_time>& thesecounts : allcounts) {
+        for (val_time& thisone : thesecounts) {
+            if (thisone.h1 > 0) {
+                char buffbuff[10];
+                snprintf(buffbuff, sizeof(buffbuff), "%.2f", thisone.h1);
+                gtk_entry_set_text(GTK_ENTRY(thisone.en1),buffbuff);
+                gtk_widget_set_sensitive(GTK_WIDGET(thisone.en1), FALSE);
+                gtk_widget_set_sensitive(GTK_WIDGET(thisone.bt1), FALSE);
+            }
+        }
+    }
+    // computed bias if there is any
+    if (gravtie->bias>0) {
+        char bstring[30];
+        sprintf(bstring,"Computed bias: %.2f", gravtie->bias);
+        gtk_label_set_text(GTK_LABEL(gravtie->bias_label), bstring);
+    }
+
     return;
 }
 
@@ -981,6 +1103,8 @@ void on_compute_bias(GtkWidget *button, gpointer data) {
     double avg_dgs_grav;
     double pier_grav;
 
+    if (debug_dgs && gravtie->shinfo.gravgrav.size() == 0) return;
+
     if (gravtie->h1.h1 != -999) {
         heights.push_back(-1*std::abs(gravtie->h1.h1));  // all heights should be negative numbers
         if (debug_dgs) {
@@ -1300,6 +1424,26 @@ static void on_savetie_clicked(GtkWidget *button, gpointer data) {
     //gtk_label_set_text(GTK_LABEL(shinfo->dgs_label), dstring); 
 }
 
+static void on_readtie_clicked(GtkWidget *button, gpointer data) {
+    tie* gravtie = static_cast<tie*>(data);
+    //parent window for file chooser not strictly necessary though it is recommended
+    GtkWidget *file_chooser = gtk_file_chooser_dialog_new("Select File",
+                                                           NULL, //GTK_WINDOW(user_data), 
+                                                           GTK_FILE_CHOOSER_ACTION_OPEN,
+                                                           "_Cancel",
+                                                           GTK_RESPONSE_CANCEL,
+                                                           "_Open",
+                                                           GTK_RESPONSE_ACCEPT,
+                                                           NULL);
+
+    if (gtk_dialog_run(GTK_DIALOG(file_chooser)) == GTK_RESPONSE_ACCEPT) {
+        char* filename;
+        filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(file_chooser));
+        toml_to_tie(filename, gravtie);
+    }
+    gtk_widget_destroy(file_chooser);
+
+}
 
 ////////////////////////////////////////////////////////////////////////
 // main!
@@ -1761,6 +1905,7 @@ int main(int argc, char *argv[]) {
     GtkWidget *landtie_switch = gtk_switch_new();
     GtkWidget *landtie_label = gtk_label_new("Land tie: ");
     gtk_label_set_xalign(GTK_LABEL(landtie_label), 1.0);  // right-justify the text
+    gravtie.lminfo.lts = landtie_switch;
     g_signal_connect(G_OBJECT(landtie_switch), "state-set", G_CALLBACK(landtie_switch_callback), &gravtie);
     gtk_grid_attach(GTK_GRID(grid), landtie_label, 0, 3, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), landtie_switch, 1, 3, 1, 1);
@@ -1806,6 +1951,7 @@ int main(int argc, char *argv[]) {
     gtk_grid_attach(GTK_GRID(grid), button21, 10, 14, 2, 1);
     gtk_grid_attach(GTK_GRID(grid), button22, 6, 14, 2, 1);
     g_signal_connect(button21, "clicked", G_CALLBACK(on_savetie_clicked), &gravtie);
+    g_signal_connect(button1, "clicked", G_CALLBACK(on_readtie_clicked), &gravtie);
 
     ////////////////////////////////////////////////////////////////////////
     // final stages for cleanup

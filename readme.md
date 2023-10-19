@@ -15,10 +15,11 @@ Feel free to dive into the code comments, for now! A full manual for the GUI is 
 The file `example.toml` shows the format of a tie that has been written out from the GUI (just to a file, not to a report). The format is TOML-compliant (v1.0.0). 
 
 ## TODO
-re-read filling fields in GUI
+alt_shipname needs to be an option for "other" etc, fix combobox reread appropriately
 docs
 actions build binaries
 cal table label to show something has been read
+landtie value label to show it has been computed
 option for manual timestamp entry
 writing ties to report format (and/or to tex?)
 convert some floats to doubles
