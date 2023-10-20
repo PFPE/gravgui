@@ -122,7 +122,7 @@ struct tie {  // struct for holding an entire tie!
     GtkWidget *bias_label;
     double water_grav=-999; // byproduct of bias calc that we might want to write somewhere?
     double avg_dgs_grav=-999; // filtered sliced average grav over h1/h2/h3 time window
-    double drift=-999; // byproduct of land tie calc
+    double drift=-999999; // byproduct of land tie calc
 };
 
 ////////////////////////////////////////////////////////////////////////
@@ -365,6 +365,7 @@ void tie_to_toml(const std::string& filepath, tie* gravtie) {
     outputFile << "alt_meter=\"" << gravtie->lminfo.alt_meter << "\""<< std::endl;
     outputFile << "cal_file_path=\"" << gravtie->lminfo.cal_file_path << "\""<< std::endl;
     outputFile << "land_tie_value=" << std::fixed << std::setprecision(2) << gravtie->lminfo.land_tie_value << std::endl;
+    outputFile << "drift=" << std::fixed << std::setprecision(2) << gravtie->drift<< std::endl;
     // all the counts and milligals etc
     std::vector<std::vector<val_time>> allcounts{gravtie->acounts, gravtie->bcounts, gravtie->ccounts};
     char letter = 'a';
@@ -389,7 +390,6 @@ void tie_to_toml(const std::string& filepath, tie* gravtie) {
     outputFile << "bias=" << std::fixed << std::setprecision(2) << gravtie->bias<< std::endl;
     outputFile << "water_grav=" << std::fixed << std::setprecision(2) << gravtie->water_grav<< std::endl;
     outputFile << "avg_dgs_grav=" << std::fixed << std::setprecision(2) << gravtie->avg_dgs_grav<< std::endl;
-    outputFile << "drift=" << std::fixed << std::setprecision(2) << gravtie->drift<< std::endl;
 
     int num = 1;
     for (const val_time& thisone : gravtie->heights) {
@@ -459,10 +459,10 @@ void toml_to_tie(const std::string& filePath, tie* gravtie) {
                 // key matchups for floats: stof-ing everything
                 if (key=="station_gravity") gravtie->stinfo.station_gravity = std::stof(value);
                 if (key=="land_tie_value") gravtie->lminfo.land_tie_value = std::stof(value);
+                if (key=="drift") gravtie->drift = std::stof(value);
                 if (key=="bias") gravtie->bias = std::stof(value);
                 if (key=="water_grav") gravtie->water_grav = std::stof(value);
                 if (key=="avg_dgs_grav") gravtie->avg_dgs_grav = std::stof(value);
-                if (key=="drift") gravtie->drift = std::stof(value);
 
                 if (key=="a1.c") gravtie->acounts[0].h1 = std::stof(value);
                 if (key=="a2.c") gravtie->acounts[1].h1 = std::stof(value);
