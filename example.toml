@@ -1,13 +1,11 @@
 [SHIP]
-ship_name="R/V Langseth"
+ship_name="R/V Thompson"
 alt_ship_name=""
-# note that DGS data is not saved with tie, nor is filepath to data if any has been read
 
 [STATION]
 station_name="Elizabeth Pier"
 alt_station_name=""
 station_gravity=980437.19
-# note that other k/v pairs from stations.db are not saved with tie; reread later if needed
 
 [LANDMETER]
 landtie=true
@@ -16,43 +14,43 @@ alt_meter=""
 cal_file_path="G-410.CAL"
 land_tie_value=829454.71
 a1.c=1000.00
-a1.t=2023-10-19T00:12:39Z
-a1.m=-999.00
+a1.t=2023-10-19T05:12:39Z
+a1.m=94713.05
 a2.c=1020.00
-a2.t=2023-10-19T00:12:43Z
-a2.m=-999.00
+a2.t=2023-10-19T05:12:43Z
+a2.m=21047.05
 a3.c=1029.00
-a3.t=2023-10-19T00:12:45Z
-a3.m=-999.00
+a3.t=2023-10-19T05:12:45Z
+a3.m=30517.75
 b1.c=3982.00
-b1.t=2023-10-19T00:12:48Z
-b1.m=-999.00
+b1.t=2023-10-19T05:12:48Z
+b1.m=336337.18
 b2.c=4837.00
-b2.t=2023-10-19T00:12:50Z
-b2.m=-999.00
+b2.t=2023-10-19T05:12:50Z
+b2.m=186781.50
 b3.c=2635.00
-b3.t=2023-10-19T00:12:52Z
-b3.m=-999.00
+b3.t=2023-10-19T05:12:52Z
+b3.m=95712.76
 c1.c=1625.00
-c1.t=2023-10-19T00:12:55Z
-c1.m=-999.00
+c1.t=2023-10-19T05:12:55Z
+c1.m=42082.05
 c2.c=1435.00
-c2.t=2023-10-19T00:12:57Z
-c2.m=-999.00
+c2.t=2023-10-19T05:12:57Z
+c2.m=51553.95
 c3.c=2534.00
-c3.t=2023-10-19T00:13:00Z
-c3.m=-999.00
-# note that calibration table itself is not saved with tie; reread later if needed
+c3.t=2023-10-19T05:13:00Z
+c3.m=89403.37
 
 [TIE]
 personnel="Moishe Zugmir"
-bias=-999.00
-water_grav=-999.00
-avg_dgs_grav=-999.00
+bias=819441.03
+water_grav=829454.35
+avg_dgs_grav=10013.32
 drift=816.92
-h1.h=-999.00
-h1.t=1969-12-31T23:43:21Z
-h2.h=-999.00
-h2.t=1969-12-31T23:43:21Z
-h3.h=-999.00
-h3.t=1969-12-31T23:43:21Z
+h1.h=1.00
+h1.t=2023-10-20T04:50:52Z
+h2.h=1.30
+h2.t=2023-10-20T04:50:54Z
+h3.h=1.20
+h3.t=2023-10-20T04:50:58Z
+
