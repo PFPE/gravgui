@@ -1266,6 +1266,22 @@ void on_compute_bias(GtkWidget *button, gpointer data) {
     gtk_label_set_text(GTK_LABEL(gravtie->bias_label), bstring);
 }
 
+// clear bias calculated (not super necessary, can always recalculate?)
+void on_clear_bias(GtkWidget *button, gpointer data) {
+    tie* gravtie = static_cast<tie*>(data);  // we def need the whole tie for this one
+
+    gravtie->bias = -999;
+    gravtie->avg_dgs_grav = -999;
+    gravtie->water_grav = -999;
+
+    std::stringstream strm;
+    strm << std::fixed << std::setprecision(2) << gravtie->bias;
+    std::string test = strm.str();
+    char bstring[test.length()+16];
+    sprintf(bstring,"Computed bias: ");
+    gtk_label_set_text(GTK_LABEL(gravtie->bias_label), bstring);
+}
+
 // convert counts to mgals for one timestamped thing and given calibration table
 double convert_counts_mgals (val_time c1, calibration calib) {
     double mgals = 0.;
@@ -1963,22 +1979,26 @@ int main(int argc, char *argv[]) {
     gtk_widget_set_sensitive(GTK_WIDGET(b_complandtie), FALSE);
 
     // COMPUTE BIAS ////////////////////////////////////////////////////////
+    GtkWidget *b_bias = gtk_button_new_with_label("compute bias");
+    gtk_grid_attach(GTK_GRID(grid), b_bias, 8, 8, 2, 1);
+    g_signal_connect(b_bias, "clicked", G_CALLBACK(on_compute_bias), &gravtie);
     GtkWidget *bias_label = gtk_label_new("Computed bias: ");
     gtk_label_set_xalign(GTK_LABEL(bias_label), 0.0);  // left-justify the text
     gtk_label_set_line_wrap(GTK_LABEL(bias_label), TRUE);
-    gtk_grid_attach(GTK_GRID(grid), bias_label, 10, 13, 2, 1);
+    gtk_grid_attach(GTK_GRID(grid), bias_label, 10, 8, 2, 1);
     gravtie.bias_label = bias_label;
-    GtkWidget *b_bias = gtk_button_new_with_label("compute bias");
-    gtk_grid_attach(GTK_GRID(grid), b_bias, 8, 13, 2, 1);
-    g_signal_connect(b_bias, "clicked", G_CALLBACK(on_compute_bias), &gravtie);
+    GtkWidget *b_biasclear = gtk_button_new_with_label("clear bias");
+    gtk_grid_attach(GTK_GRID(grid), b_biasclear, 8, 9, 2, 1);
+    g_signal_connect(b_biasclear, "clicked", G_CALLBACK(on_clear_bias), &gravtie);
+    
 
     // SAVE/LOAD BUTTONS ///////////////////////////////////////////////////
     GtkWidget *button1 = gtk_button_new_with_label("Load saved tie");
     GtkWidget *button21 = gtk_button_new_with_label("save current tie");
     GtkWidget *button22 = gtk_button_new_with_label("output report");
-    gtk_grid_attach(GTK_GRID(grid), button1, 8, 14, 2, 1);
-    gtk_grid_attach(GTK_GRID(grid), button21, 10, 14, 2, 1);
-    gtk_grid_attach(GTK_GRID(grid), button22, 6, 14, 2, 1);
+    gtk_grid_attach(GTK_GRID(grid), button1, 8, 11, 2, 1);
+    gtk_grid_attach(GTK_GRID(grid), button21, 8, 12, 2, 1);
+    gtk_grid_attach(GTK_GRID(grid), button22, 8, 13, 2, 1);
     g_signal_connect(button21, "clicked", G_CALLBACK(on_savetie_clicked), &gravtie);
     g_signal_connect(button1, "clicked", G_CALLBACK(on_readtie_clicked), &gravtie);
 

@@ -24,7 +24,6 @@ docs
 actions build binaries
 option for manual timestamp entry?
 writing ties to report format (and/or to tex?)
-clear bias button (bias, drift, avg dgs grav)
 
 ### would be nice someday
 modularity/header files
