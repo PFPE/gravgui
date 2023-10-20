@@ -1,6 +1,14 @@
+# no object files, no swap files
 *.o
 .*swp
+
+# none of the excess stuff I keep in this dir on local
 old/*
-test*.toml
-# do not track the executable from local
+
+# no toml files except for the example for formatting
+*.toml
+!example.toml
+
+# do not track the executable from local, do not track local build dir
 gravgui
+build/*
