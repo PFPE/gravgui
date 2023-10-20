@@ -5,7 +5,12 @@ This repository contains software for computing gravity ties. The primary way to
 ### C++ executable
 Pre-compiled binaries for Windows, MacOS, and Linux are *not yet* available but they will be, once I figure out github actions.
 
-In the meantime, everything can be compiled on your local machine using gcc/g++. An example of how to compile the program for Ubuntu Linux is provided in the repository.
+In the meantime, everything can be compiled on your local machine using gcc/g++ provided you have the requisite gtk3 libraries installed. To do this with cmake, run the following:
+`mkdir build`
+`cd build`
+`cmake ..`
+`make`
+To do this without cmake, you can run the provided `make_gui` script in your favorite shell.
 
 ## Usage
 Run the compiled program from a terminal. Instructions for how to set this up with a launcher/icon in the more familiar way will be added if I ever figure out how to do that.
@@ -19,9 +24,9 @@ docs
 actions build binaries
 option for manual timestamp entry?
 writing ties to report format (and/or to tex?)
+clear bias button (bias, drift, avg dgs grav)
 
 ### would be nice someday
-make sure -999s are all ok
 modularity/header files
 clean up filter + window function libraries
 grav plotting? with filtering outside of bias calc?
