@@ -115,15 +115,9 @@ struct tie {  // struct for holding an entire tie!
     GtkWidget *lt_button;
     //bool metric;  // might not use this? can we make everyone use meters?
     std::vector<val_time> heights{3}; // pier water heights, timestamped
-    val_time a1;  // these are only used for a land tie
-    val_time a2;
-    val_time a3;
-    val_time b1;
-    val_time b2;
-    val_time b3;
-    val_time c1;
-    val_time c2;
-    val_time c3;
+    std::vector<val_time> acounts{3}; // ship 1, land tie
+    std::vector<val_time> bcounts{3}; // land 1, land tie
+    std::vector<val_time> ccounts{3}; // ship 2, land tie
     double bias=-999;  // the thing we want to calculate in the end
     GtkWidget *bias_label;
     double water_grav=-999; // byproduct of bias calc that we might want to write somewhere?
@@ -372,10 +366,7 @@ void tie_to_toml(const std::string& filepath, tie* gravtie) {
     outputFile << "cal_file_path=\"" << gravtie->lminfo.cal_file_path << "\""<< std::endl;
     outputFile << "land_tie_value=" << std::fixed << std::setprecision(2) << gravtie->lminfo.land_tie_value << std::endl;
     // all the counts and milligals etc
-    std::vector<val_time> acounts{gravtie->a1, gravtie->a2, gravtie->a3};
-    std::vector<val_time> bcounts{gravtie->b1, gravtie->b2, gravtie->b3};
-    std::vector<val_time> ccounts{gravtie->c1, gravtie->c2, gravtie->c3};
-    std::vector<std::vector<val_time>> allcounts{acounts, bcounts, ccounts};
+    std::vector<std::vector<val_time>> allcounts{gravtie->acounts, gravtie->bcounts, gravtie->ccounts};
     char letter = 'a';
     for (const std::vector<val_time>& thesecounts : allcounts) {
         int num = 1;
@@ -473,24 +464,24 @@ void toml_to_tie(const std::string& filePath, tie* gravtie) {
                 if (key=="avg_dgs_grav") gravtie->avg_dgs_grav = std::stof(value);
                 if (key=="drift") gravtie->drift = std::stof(value);
 
-                if (key=="a1.c") gravtie->a1.h1 = std::stof(value);
-                if (key=="a2.c") gravtie->a2.h1 = std::stof(value);
-                if (key=="a3.c") gravtie->a3.h1 = std::stof(value);
-                if (key=="b1.c") gravtie->b1.h1 = std::stof(value);
-                if (key=="b2.c") gravtie->b2.h1 = std::stof(value);
-                if (key=="b3.c") gravtie->b3.h1 = std::stof(value);
-                if (key=="c1.c") gravtie->c1.h1 = std::stof(value);
-                if (key=="c2.c") gravtie->c2.h1 = std::stof(value);
-                if (key=="c3.c") gravtie->c3.h1 = std::stof(value);
-                if (key=="a1.m") gravtie->a1.m1 = std::stof(value);
-                if (key=="a2.m") gravtie->a2.m1 = std::stof(value);
-                if (key=="a3.m") gravtie->a3.m1 = std::stof(value);
-                if (key=="b1.m") gravtie->b1.m1 = std::stof(value);
-                if (key=="b2.m") gravtie->b2.m1 = std::stof(value);
-                if (key=="b3.m") gravtie->b3.m1 = std::stof(value);
-                if (key=="c1.m") gravtie->c1.m1 = std::stof(value);
-                if (key=="c2.m") gravtie->c2.m1 = std::stof(value);
-                if (key=="c3.m") gravtie->c3.m1 = std::stof(value);
+                if (key=="a1.c") gravtie->acounts[0].h1 = std::stof(value);
+                if (key=="a2.c") gravtie->acounts[1].h1 = std::stof(value);
+                if (key=="a3.c") gravtie->acounts[2].h1 = std::stof(value);
+                if (key=="b1.c") gravtie->bcounts[0].h1 = std::stof(value);
+                if (key=="b2.c") gravtie->bcounts[1].h1 = std::stof(value);
+                if (key=="b3.c") gravtie->bcounts[2].h1 = std::stof(value);
+                if (key=="c1.c") gravtie->ccounts[0].h1 = std::stof(value);
+                if (key=="c2.c") gravtie->ccounts[1].h1 = std::stof(value);
+                if (key=="c3.c") gravtie->ccounts[2].h1 = std::stof(value);
+                if (key=="a1.m") gravtie->acounts[0].m1 = std::stof(value);
+                if (key=="a2.m") gravtie->acounts[1].m1 = std::stof(value);
+                if (key=="a3.m") gravtie->acounts[2].m1 = std::stof(value);
+                if (key=="b1.m") gravtie->bcounts[0].m1 = std::stof(value);
+                if (key=="b2.m") gravtie->bcounts[1].m1 = std::stof(value);
+                if (key=="b3.m") gravtie->bcounts[2].m1 = std::stof(value);
+                if (key=="c1.m") gravtie->ccounts[0].m1 = std::stof(value);
+                if (key=="c2.m") gravtie->ccounts[1].m1 = std::stof(value);
+                if (key=="c3.m") gravtie->ccounts[2].m1 = std::stof(value);
 
                 if (key=="h1.h") gravtie->heights[0].h1 = std::stof(value);
                 if (key=="h2.h") gravtie->heights[1].h1 = std::stof(value);
@@ -501,15 +492,15 @@ void toml_to_tie(const std::string& filePath, tie* gravtie) {
                     std::tm timestamp = {};
                     if (strptime(value.c_str(), "%Y-%m-%dT%H:%M:%SZ", &timestamp) != nullptr) {
                         time_t outtime = std::mktime(&timestamp);
-                        if (key.substr(0,2)=="a1") gravtie->a1.t1 = outtime;
-                        if (key.substr(0,2)=="a2") gravtie->a2.t1 = outtime;
-                        if (key.substr(0,2)=="a3") gravtie->a3.t1 = outtime;
-                        if (key.substr(0,2)=="b1") gravtie->b1.t1 = outtime;
-                        if (key.substr(0,2)=="b2") gravtie->b2.t1 = outtime;
-                        if (key.substr(0,2)=="b3") gravtie->b3.t1 = outtime;
-                        if (key.substr(0,2)=="c1") gravtie->c1.t1 = outtime;
-                        if (key.substr(0,2)=="c2") gravtie->c2.t1 = outtime;
-                        if (key.substr(0,2)=="c3") gravtie->c3.t1 = outtime;
+                        if (key.substr(0,2)=="a1") gravtie->acounts[0].t1 = outtime;
+                        if (key.substr(0,2)=="a2") gravtie->acounts[1].t1 = outtime;
+                        if (key.substr(0,2)=="a3") gravtie->acounts[2].t1 = outtime;
+                        if (key.substr(0,2)=="b1") gravtie->bcounts[0].t1 = outtime;
+                        if (key.substr(0,2)=="b2") gravtie->bcounts[1].t1 = outtime;
+                        if (key.substr(0,2)=="b3") gravtie->bcounts[2].t1 = outtime;
+                        if (key.substr(0,2)=="c1") gravtie->ccounts[0].t1 = outtime;
+                        if (key.substr(0,2)=="c2") gravtie->ccounts[1].t1 = outtime;
+                        if (key.substr(0,2)=="c3") gravtie->ccounts[2].t1 = outtime;
                         if (key.substr(0,2)=="h1") gravtie->heights[0].t1 = outtime;
                         if (key.substr(0,2)=="h2") gravtie->heights[1].t1 = outtime;
                         if (key.substr(0,2)=="h3") gravtie->heights[2].t1 = outtime;
@@ -621,10 +612,7 @@ void toml_to_tie(const std::string& filePath, tie* gravtie) {
         gtk_widget_set_sensitive(GTK_WIDGET(gravtie->lminfo.cb1), FALSE);
     }
     // a/b/c/h: values, saves
-    std::vector<val_time> acounts{gravtie->a1, gravtie->a2, gravtie->a3};
-    std::vector<val_time> bcounts{gravtie->b1, gravtie->b2, gravtie->b3};
-    std::vector<val_time> ccounts{gravtie->c1, gravtie->c2, gravtie->c3};
-    std::vector<std::vector<val_time>> allcounts{acounts, bcounts, ccounts, gravtie->heights};
+    std::vector<std::vector<val_time>> allcounts{gravtie->acounts, gravtie->bcounts, gravtie->ccounts, gravtie->heights};
     for (std::vector<val_time>& thesecounts : allcounts) {
         for (val_time& thisone : thesecounts) {
             if (thisone.h1 > 0) {
@@ -1130,8 +1118,8 @@ void on_compute_bias(GtkWidget *button, gpointer data) {
     tie* gravtie = static_cast<tie*>(data);  // we def need the whole tie for this one
     std::vector<float> heights;  // get all heights and timestamps for water grav calc
     std::vector<time_t> height_stamps;
-    double water_grav = -999;
-    double avg_dgs_grav = -999;
+    double water_grav=-999;
+    double avg_dgs_grav=-999;
     double pier_grav;
 
     if (debug_dgs && gravtie->shinfo.gravgrav.size() == 0) return;
@@ -1264,33 +1252,34 @@ void on_compute_bias(GtkWidget *button, gpointer data) {
     } else {
         return;  // if no grav data loaded, can't do anything else
     }
-    // calculate! save in tie! put value in a label somewhere so it is visible before save?
+    // calculate! put value in a label so it is visible!
     double bias = water_grav - avg_dgs_grav;
     gravtie->bias = bias;
     gravtie->avg_dgs_grav = avg_dgs_grav;
     gravtie->water_grav = water_grav;
-    char bstring[30];
+
+    std::stringstream strm;
+    strm << std::fixed << std::setprecision(2) << bias;
+    std::string test = strm.str();
+    char bstring[test.length()+16];
     sprintf(bstring,"Computed bias: %.2f", bias);
     gtk_label_set_text(GTK_LABEL(gravtie->bias_label), bstring);
-    //std::cout << water_grav << std::endl;
-    //std::cout << avg_dgs_grav << std::endl;
-    //std::cout << bias << std::endl;
 }
 
 // convert counts to mgals for one timestamped thing and given calibration table
-float convert_counts_mgals (val_time c1, calibration calib) {
-    float mgals;
+double convert_counts_mgals (val_time c1, calibration calib) {
+    double mgals = 0.;
     int cind = 0;
-    float min_diff = std::abs(c1.h1 - calib.brackets[cind]);
+    double min_diff = std::abs(c1.h1 - calib.brackets[cind]);
 
     for (int i=1; i<calib.brackets.size(); i++) {
-        float diff = std::abs(c1.h1 - calib.brackets[i]);
+        double diff = std::abs(c1.h1 - calib.brackets[i]);
         if (diff < min_diff && calib.brackets[i] < c1.h1) {
             cind = i;
             min_diff = diff;
         }  // TODO catch if we fall off the end of the table
     }
-    float residual_reading = c1.h1 - calib.brackets[cind];  // subtract bracket from counts
+    double residual_reading = c1.h1 - calib.brackets[cind];  // subtract bracket from counts
     mgals = residual_reading*calib.factors[cind] + calib.offsets[cind]; // calibrate to mgals!
     return mgals;
 }
@@ -1308,31 +1297,59 @@ void on_compute_landtie(GtkWidget *button, gpointer data) {
     }
 
     // for each set of counts measurements, check for values, convert to mgals, and get avgs
-    std::vector<val_time> acounts{gravtie->a1, gravtie->a2, gravtie->a3};
-    std::vector<val_time> bcounts{gravtie->b1, gravtie->b2, gravtie->b3};
-    std::vector<val_time> ccounts{gravtie->c1, gravtie->c2, gravtie->c3};
-    std::vector<std::vector<val_time>> allcounts{acounts, bcounts, ccounts};
-    std::vector<float> mgal_averages;
+    std::vector<double> mgal_averages;
     std::vector<time_t> t_averages;
-    for (std::vector<val_time>& thesecounts : allcounts) {
-        float mgal_sum = 0;
-        time_t t_sum = 0;
-        int icounts = 0;
-        for (val_time& thisone : thesecounts) {
-            if (thisone.h1 > 0) {
-                float mgalval = convert_counts_mgals(thisone, gravtie->lminfo.calib);
-                thisone.m1 = mgalval;
-                mgal_sum += mgalval;
-                t_sum += thisone.t1;
-                icounts += 1;
-            }
+
+    // un-vectorize this a bit bc otherwise we can't save mgal values to tie
+    // two layers of vectors was too much for referencing for some reason I do not understand
+    double mgal_sum = 0;
+    time_t t_sum = 0;
+    int icounts = 0;
+    for (val_time& thisone : gravtie->acounts) {
+        if (thisone.h1 > 0) {
+            double mgalval = convert_counts_mgals(thisone,gravtie->lminfo.calib);
+            thisone.m1 = mgalval;
+            mgal_sum += mgalval;
+            t_sum += thisone.t1;
+            icounts += 1;
         }
-        if (icounts == 0) { // one of the three sets has 0 measurements
-            return;  // which means no land tie for us
-        }
-        mgal_averages.push_back(mgal_sum/icounts);
-        t_averages.push_back(t_sum/icounts);
     }
+    if (icounts == 0) return;  // no a1 counts
+    mgal_averages.push_back(mgal_sum/icounts);
+    t_averages.push_back(t_sum/icounts);
+
+    mgal_sum = 0;
+    t_sum = 0;
+    icounts = 0;
+    for (val_time& thisone : gravtie->bcounts) {
+        if (thisone.h1 > 0) {
+            double mgalval = convert_counts_mgals(thisone,gravtie->lminfo.calib);
+            thisone.m1 = mgalval;
+            mgal_sum += mgalval;
+            t_sum += thisone.t1;
+            icounts += 1;
+        }
+    }
+    if (icounts == 0) return;  // no a1 counts
+    mgal_averages.push_back(mgal_sum/icounts);
+    t_averages.push_back(t_sum/icounts);
+
+    mgal_sum = 0;
+    t_sum = 0;
+    icounts = 0;
+    for (val_time& thisone : gravtie->ccounts) {
+        if (thisone.h1 > 0) {
+            double mgalval = convert_counts_mgals(thisone,gravtie->lminfo.calib);
+            thisone.m1 = mgalval;
+            mgal_sum += mgalval;
+            t_sum += thisone.t1;
+            icounts += 1;
+        }
+    }
+    if (icounts == 0) return;  // no a1 counts
+    mgal_averages.push_back(mgal_sum/icounts);
+    t_averages.push_back(t_sum/icounts);
+
     // use averaged times and mgals to do drift and tie calc
     double AA_timedelta = difftime(t_averages[2], t_averages[0]);
     double AB_timedelta = difftime(t_averages[1], t_averages[0]);
@@ -1355,10 +1372,7 @@ static void landtie_switch_callback(GtkSwitch *switch_widget, gboolean state, gp
     if (state) {
         gravtie->lminfo.landtie = TRUE;
 
-        std::vector<val_time> acounts{gravtie->a1, gravtie->a2, gravtie->a3};
-        std::vector<val_time> bcounts{gravtie->b1, gravtie->b2, gravtie->b3};
-        std::vector<val_time> ccounts{gravtie->c1, gravtie->c2, gravtie->c3};
-        std::vector<std::vector<val_time>> allcounts{acounts, bcounts, ccounts};
+        std::vector<std::vector<val_time>> allcounts{gravtie->acounts, gravtie->bcounts, gravtie->ccounts};
         for (std::vector<val_time>& thesecounts : allcounts) {
             for (val_time& thisone : thesecounts) {
                 gtk_widget_set_sensitive(GTK_WIDGET(thisone.bt2), TRUE);  // turn on all reset buttons
@@ -1378,10 +1392,7 @@ static void landtie_switch_callback(GtkSwitch *switch_widget, gboolean state, gp
     } else {
         gravtie->lminfo.landtie = FALSE;
 
-        std::vector<val_time> acounts{gravtie->a1, gravtie->a2, gravtie->a3};
-        std::vector<val_time> bcounts{gravtie->b1, gravtie->b2, gravtie->b3};
-        std::vector<val_time> ccounts{gravtie->c1, gravtie->c2, gravtie->c3};
-        std::vector<std::vector<val_time>> allcounts{acounts, bcounts, ccounts};
+        std::vector<std::vector<val_time>> allcounts{gravtie->acounts, gravtie->bcounts, gravtie->ccounts};
         for (std::vector<val_time>& thesecounts : allcounts) {
             for (val_time& thisone : thesecounts) {
                 gtk_widget_set_sensitive(GTK_WIDGET(thisone.bt2), FALSE);
@@ -1807,15 +1818,15 @@ int main(int argc, char *argv[]) {
     gtk_widget_set_sensitive(GTK_WIDGET(e_c2), FALSE);
     gtk_widget_set_sensitive(GTK_WIDGET(e_c3), FALSE);
     // add to tie
-    gravtie.a1.en1 = e_a1;
-    gravtie.a2.en1 = e_a2;
-    gravtie.a3.en1 = e_a3;
-    gravtie.b1.en1 = e_b1;
-    gravtie.b2.en1 = e_b2;
-    gravtie.b3.en1 = e_b3;
-    gravtie.c1.en1 = e_c1;
-    gravtie.c2.en1 = e_c2;
-    gravtie.c3.en1 = e_c3;
+    gravtie.acounts[0].en1 = e_a1;
+    gravtie.acounts[1].en1 = e_a2;
+    gravtie.acounts[2].en1 = e_a3;
+    gravtie.bcounts[0].en1 = e_b1;
+    gravtie.bcounts[1].en1 = e_b2;
+    gravtie.bcounts[2].en1 = e_b3;
+    gravtie.ccounts[0].en1 = e_c1;
+    gravtie.ccounts[1].en1 = e_c2;
+    gravtie.ccounts[2].en1 = e_c3;
 
     // buttons
     GtkWidget *b_a1 = gtk_button_new_with_label("save a1");
@@ -1855,24 +1866,24 @@ int main(int argc, char *argv[]) {
     gtk_grid_attach(GTK_GRID(grid), b_rc2, 3, 12, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), b_rc3, 3, 13, 1, 1);
     // connect save and reset buttons to callbacks, for land tie counts
-    g_signal_connect(b_a1, "clicked", G_CALLBACK(on_timestamp_button), &gravtie.a1);
-    g_signal_connect(b_a2, "clicked", G_CALLBACK(on_timestamp_button), &gravtie.a2);
-    g_signal_connect(b_a3, "clicked", G_CALLBACK(on_timestamp_button), &gravtie.a3);
-    g_signal_connect(b_b1, "clicked", G_CALLBACK(on_timestamp_button), &gravtie.b1);
-    g_signal_connect(b_b2, "clicked", G_CALLBACK(on_timestamp_button), &gravtie.b2);
-    g_signal_connect(b_b3, "clicked", G_CALLBACK(on_timestamp_button), &gravtie.b3);
-    g_signal_connect(b_c1, "clicked", G_CALLBACK(on_timestamp_button), &gravtie.c1);
-    g_signal_connect(b_c2, "clicked", G_CALLBACK(on_timestamp_button), &gravtie.c2);
-    g_signal_connect(b_c3, "clicked", G_CALLBACK(on_timestamp_button), &gravtie.c3);
-    g_signal_connect(b_ra1, "clicked", G_CALLBACK(on_reset_button), &gravtie.a1);
-    g_signal_connect(b_ra2, "clicked", G_CALLBACK(on_reset_button), &gravtie.a2);
-    g_signal_connect(b_ra3, "clicked", G_CALLBACK(on_reset_button), &gravtie.a3);
-    g_signal_connect(b_rb1, "clicked", G_CALLBACK(on_reset_button), &gravtie.b1);
-    g_signal_connect(b_rb2, "clicked", G_CALLBACK(on_reset_button), &gravtie.b2);
-    g_signal_connect(b_rb3, "clicked", G_CALLBACK(on_reset_button), &gravtie.b3);
-    g_signal_connect(b_rc1, "clicked", G_CALLBACK(on_reset_button), &gravtie.c1);
-    g_signal_connect(b_rc2, "clicked", G_CALLBACK(on_reset_button), &gravtie.c2);
-    g_signal_connect(b_rc3, "clicked", G_CALLBACK(on_reset_button), &gravtie.c3);
+    g_signal_connect(b_a1, "clicked", G_CALLBACK(on_timestamp_button), &gravtie.acounts[0]);
+    g_signal_connect(b_a2, "clicked", G_CALLBACK(on_timestamp_button), &gravtie.acounts[1]);
+    g_signal_connect(b_a3, "clicked", G_CALLBACK(on_timestamp_button), &gravtie.acounts[2]);
+    g_signal_connect(b_b1, "clicked", G_CALLBACK(on_timestamp_button), &gravtie.bcounts[0]);
+    g_signal_connect(b_b2, "clicked", G_CALLBACK(on_timestamp_button), &gravtie.bcounts[1]);
+    g_signal_connect(b_b3, "clicked", G_CALLBACK(on_timestamp_button), &gravtie.bcounts[2]);
+    g_signal_connect(b_c1, "clicked", G_CALLBACK(on_timestamp_button), &gravtie.ccounts[0]);
+    g_signal_connect(b_c2, "clicked", G_CALLBACK(on_timestamp_button), &gravtie.ccounts[1]);
+    g_signal_connect(b_c3, "clicked", G_CALLBACK(on_timestamp_button), &gravtie.ccounts[2]);
+    g_signal_connect(b_ra1, "clicked", G_CALLBACK(on_reset_button), &gravtie.acounts[0]);
+    g_signal_connect(b_ra2, "clicked", G_CALLBACK(on_reset_button), &gravtie.acounts[1]);
+    g_signal_connect(b_ra3, "clicked", G_CALLBACK(on_reset_button), &gravtie.acounts[2]);
+    g_signal_connect(b_rb1, "clicked", G_CALLBACK(on_reset_button), &gravtie.bcounts[0]);
+    g_signal_connect(b_rb2, "clicked", G_CALLBACK(on_reset_button), &gravtie.bcounts[1]);
+    g_signal_connect(b_rb3, "clicked", G_CALLBACK(on_reset_button), &gravtie.bcounts[2]);
+    g_signal_connect(b_rc1, "clicked", G_CALLBACK(on_reset_button), &gravtie.ccounts[0]);
+    g_signal_connect(b_rc2, "clicked", G_CALLBACK(on_reset_button), &gravtie.ccounts[1]);
+    g_signal_connect(b_rc3, "clicked", G_CALLBACK(on_reset_button), &gravtie.ccounts[2]);
     // set landtie buttons (save AND reset) to inactive initially
     gtk_widget_set_sensitive(GTK_WIDGET(b_a1), FALSE);
     gtk_widget_set_sensitive(GTK_WIDGET(b_a2), FALSE);
@@ -1893,24 +1904,24 @@ int main(int argc, char *argv[]) {
     gtk_widget_set_sensitive(GTK_WIDGET(b_rc2), FALSE);
     gtk_widget_set_sensitive(GTK_WIDGET(b_rc3), FALSE);
     // add save AND reset buttons to tie
-    gravtie.a1.bt1 = b_a1;
-    gravtie.a2.bt1 = b_a2;
-    gravtie.a3.bt1 = b_a3;
-    gravtie.b1.bt1 = b_b1;
-    gravtie.b2.bt1 = b_b2;
-    gravtie.b3.bt1 = b_b3;
-    gravtie.c1.bt1 = b_c1;
-    gravtie.c2.bt1 = b_c2;
-    gravtie.c3.bt1 = b_c3;
-    gravtie.a1.bt2 = b_ra1;
-    gravtie.a2.bt2 = b_ra2;
-    gravtie.a3.bt2 = b_ra3;
-    gravtie.b1.bt2 = b_rb1;
-    gravtie.b2.bt2 = b_rb2;
-    gravtie.b3.bt2 = b_rb3;
-    gravtie.c1.bt2 = b_rc1;
-    gravtie.c2.bt2 = b_rc2;
-    gravtie.c3.bt2 = b_rc3;
+    gravtie.acounts[0].bt1 = b_a1;
+    gravtie.acounts[1].bt1 = b_a2;
+    gravtie.acounts[2].bt1 = b_a3;
+    gravtie.bcounts[0].bt1 = b_b1;
+    gravtie.bcounts[1].bt1 = b_b2;
+    gravtie.bcounts[2].bt1 = b_b3;
+    gravtie.ccounts[0].bt1 = b_c1;
+    gravtie.ccounts[1].bt1 = b_c2;
+    gravtie.ccounts[2].bt1 = b_c3;
+    gravtie.acounts[0].bt2 = b_ra1;
+    gravtie.acounts[1].bt2 = b_ra2;
+    gravtie.acounts[2].bt2 = b_ra3;
+    gravtie.bcounts[0].bt2 = b_rb1;
+    gravtie.bcounts[1].bt2 = b_rb2;
+    gravtie.bcounts[2].bt2 = b_rb3;
+    gravtie.ccounts[0].bt2 = b_rc1;
+    gravtie.ccounts[1].bt2 = b_rc2;
+    gravtie.ccounts[2].bt2 = b_rc3;
 
     // LAND TIE TOGGLE SWITCH //////////////////////////////////////////
     GtkWidget *landtie_switch = gtk_switch_new();
