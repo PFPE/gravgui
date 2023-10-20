@@ -19,8 +19,6 @@ docs
 actions build binaries
 option for manual timestamp entry?
 writing ties to report format (and/or to tex?)
-convert some floats to doubles
-reorganize tie struct with vectors for a/b/c/h
 
 ### would be nice someday
 make sure -999s are all ok
