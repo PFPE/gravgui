@@ -25,7 +25,6 @@ The file `example.toml` shows the format of a tie that has been written out from
 docs\
 actions build binaries (test on windows and mac)\
 option for manual timestamp entry?\
-writing ties to report format (and/or to tex?)\
 modularity/header files
 
 ### would be nice someday

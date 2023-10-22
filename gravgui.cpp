@@ -120,6 +120,7 @@ struct tie {  // struct for holding an entire tie!
     std::vector<val_time> ccounts{3}; // ship 2, land tie
     double bias=-999;  // the thing we want to calculate in the end
     GtkWidget *bias_label;
+    double avg_height=-999;
     double water_grav=-999; // byproduct of bias calc that we might want to write somewhere?
     double avg_dgs_grav=-999; // filtered sliced average grav over h1/h2/h3 time window
     double drift=-999999; // byproduct of land tie calc
@@ -390,6 +391,7 @@ void tie_to_toml(const std::string& filepath, tie* gravtie) {
     outputFile << "bias=" << std::fixed << std::setprecision(2) << gravtie->bias<< std::endl;
     outputFile << "water_grav=" << std::fixed << std::setprecision(2) << gravtie->water_grav<< std::endl;
     outputFile << "avg_dgs_grav=" << std::fixed << std::setprecision(2) << gravtie->avg_dgs_grav<< std::endl;
+    outputFile << "avg_height=" << std::fixed << std::setprecision(2) << gravtie->avg_height << std::endl;
 
     int num = 1;
     for (const val_time& thisone : gravtie->heights) {
@@ -463,6 +465,7 @@ void toml_to_tie(const std::string& filePath, tie* gravtie) {
                 if (key=="bias") gravtie->bias = std::stof(value);
                 if (key=="water_grav") gravtie->water_grav = std::stof(value);
                 if (key=="avg_dgs_grav") gravtie->avg_dgs_grav = std::stof(value);
+                if (key=="avg_height") gravtie->avg_height = std::stof(value);
 
                 if (key=="a1.c") gravtie->acounts[0].h1 = std::stof(value);
                 if (key=="a2.c") gravtie->acounts[1].h1 = std::stof(value);
@@ -649,6 +652,97 @@ void toml_to_tie(const std::string& filePath, tie* gravtie) {
     return;
 }
 
+void write_report(const std::string& filepath, tie* gravtie) {
+    // Open the file for writing
+    std::ofstream outputFile(filepath);
+
+    if (!outputFile.is_open()) {
+        std::cerr << "Failed to open the file: " << filepath << std::endl;
+        return;
+    }
+    outputFile << std::endl;  // empty line at top of file apparently
+    // go through all the (known) components of tie, write them out
+    if (gravtie->shinfo.ship == "Other") {
+        outputFile << "Ship: " << gravtie->shinfo.alt_ship << std::endl;
+    } else {
+        outputFile << "Ship: " << gravtie->shinfo.ship << std::endl;
+    }
+    outputFile << "Personnel: " << gravtie->prinfo.personnel << std::endl;
+    outputFile << std::endl;
+
+    outputFile << "#Base Station:" << std::endl;
+    if (gravtie->stinfo.station == "Other") {
+        outputFile << "Name: " << gravtie->stinfo.alt_station << std::endl;
+    } else {
+        outputFile << "Name: " << gravtie->stinfo.station << std::endl;
+    }
+    outputFile << "Number: ";
+    for (const auto& kv : gravtie->stinfo.this_station) {
+        if (kv.first == "NUMBER") {
+            std::cout << kv.second << std::endl;
+        }
+    }
+    outputFile << "Known absolute gravity (mGal): " << std::fixed << std::setprecision(3) << gravtie->stinfo.station_gravity << std::endl;
+
+    outputFile << std::endl;
+    outputFile << "------------------- Land tie ----------------" << std::endl;
+    outputFile << std::endl;
+    
+    if (gravtie->lminfo.landtie) {
+    // TODO what goes in the land tie section? no examples given
+    } else {
+        outputFile << "N/A" << std::endl;
+    }
+    outputFile << std::endl;
+    outputFile << "------------------- End of land tie ----------------" << std::endl;
+    outputFile << std::endl;
+
+    // gravity at pier is either land tie value or station grav, depending?    
+    outputFile << "Gravity at pier (mGal): ";
+    if (gravtie->lminfo.landtie) {
+        outputFile << std::fixed << std::setprecision(3) << gravtie->lminfo.land_tie_value << std::endl;
+    } else {
+        outputFile << std::fixed << std::setprecision(3) << gravtie->stinfo.station_gravity << std::endl;
+    }
+
+    // UTC stamps and heights
+    for (int i=0; i<3; i++) {
+        time_t rawtime = gravtie->heights[i].t1;
+        struct tm * cookedtime;
+        char buffer[30];
+        cookedtime = gmtime(&rawtime);
+        strftime(buffer, sizeof(buffer), "%Y/%m/%d %H:%M:%S", cookedtime);
+        outputFile << "UTC time and water height to pier (m) " << i+1 << ": ";
+        if (gravtie->heights[i].h1 > 0) {
+            outputFile << buffer << " " << std::fixed << std::setprecision(3) << gravtie->heights[i].h1 << std::endl;
+        } else {
+            outputFile << std::endl;
+        }
+    }
+    outputFile << std::endl;
+
+    // dgs average
+    outputFile << "DgS meter gravity (mGal): " << std::fixed << std::setprecision(4) << gravtie->avg_dgs_grav << std::endl;
+    // average water height
+    outputFile << "Average water height to pier (m): " << std::fixed << std::setprecision(4) << gravtie->avg_height << std::endl;
+    // water grav
+    outputFile << "Gravity at water line (mGal): ";
+    if (gravtie->lminfo.landtie) {
+        outputFile << std::fixed << std::setprecision(3) << gravtie->lminfo.land_tie_value;
+    } else {
+        outputFile << std::fixed << std::setprecision(3) << gravtie->stinfo.station_gravity;
+    }
+    outputFile << " + " << std::fixed << std::setprecision(4) << faafactor;
+    outputFile << " * " << std::fixed << std::setprecision(4) << gravtie->avg_height;
+    outputFile << " = " << std::fixed << std::setprecision(3) << gravtie->water_grav << std::endl;
+    // bias
+    outputFile << "DgS meter bias (mGal): " << std::fixed << std::setprecision(3) << gravtie->water_grav;
+    outputFile << " - " << std::fixed << std::setprecision(4) << gravtie->avg_dgs_grav;
+    outputFile << " = " << std::fixed << std::setprecision(4) << gravtie->bias << std::endl;
+    
+    outputFile.close();
+}
+
 ////////////////////////////////////////////////////////////////////////
 // callback functions
 ////////////////////////////////////////////////////////////////////////
@@ -789,6 +883,8 @@ void on_sta_save(GtkWidget *widget, gpointer data) {
             }
         }
     }
+
+
 }
 
 // callback function for station reset button
@@ -1121,6 +1217,7 @@ void on_compute_bias(GtkWidget *button, gpointer data) {
     double water_grav=-999;
     double avg_dgs_grav=-999;
     double pier_grav;
+    double avg_height=-999;
 
     if (debug_dgs && gravtie->shinfo.gravgrav.size() == 0) return;
 
@@ -1157,7 +1254,7 @@ void on_compute_bias(GtkWidget *button, gpointer data) {
     if (heights.size() > 0) { // make sure there is at least one height measurement provided
         if (pier_grav > 0) {// check to make sure we have an absolute grav value
             auto const count = static_cast<float>(heights.size());
-            float avg_height = std::accumulate(heights.begin(), heights.end(), 0.0) / count;
+            avg_height = std::accumulate(heights.begin(), heights.end(), 0.0) / count;
             water_grav = pier_grav + faafactor*avg_height;
         }
     } else {
@@ -1257,6 +1354,7 @@ void on_compute_bias(GtkWidget *button, gpointer data) {
     gravtie->bias = bias;
     gravtie->avg_dgs_grav = avg_dgs_grav;
     gravtie->water_grav = water_grav;
+    gravtie->avg_height = avg_height;
 
     std::stringstream strm;
     strm << std::fixed << std::setprecision(2) << bias;
@@ -1476,6 +1574,37 @@ static void on_readtie_clicked(GtkWidget *button, gpointer data) {
     }
     gtk_widget_destroy(file_chooser);
 
+}
+
+static void on_write_report(GtkWidget *button, gpointer data) {
+    tie* gravtie = static_cast<tie*>(data);
+    //parent window for file chooser not strictly necessary though it is recommended
+    GtkWidget *file_chooser = gtk_file_chooser_dialog_new("Save report to file",
+                                                           NULL, //GTK_WINDOW(user_data), 
+                                                           GTK_FILE_CHOOSER_ACTION_SAVE,
+                                                           "_Cancel",
+                                                           GTK_RESPONSE_CANCEL,
+                                                           "_Save",
+                                                           GTK_RESPONSE_ACCEPT,
+                                                           NULL);
+    gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(file_chooser), true);
+    time_t rawtime;
+    struct tm * cookedtime;
+    char buffer[30];
+    time (&rawtime);
+    cookedtime = localtime(&rawtime);
+    strftime(buffer, sizeof(buffer), "tie_%Y%m%d.txt", cookedtime);
+    gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(file_chooser), buffer);
+    if (gtk_dialog_run(GTK_DIALOG(file_chooser)) == GTK_RESPONSE_ACCEPT) {
+        char *savename;
+        savename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(file_chooser));
+        write_report(savename, gravtie);
+    }
+
+    gtk_widget_destroy(file_chooser);
+    //char dstring[30];
+    //sprintf(dstring,"  %i datapoints", (int) shinfo->gravgrav.size());
+    //gtk_label_set_text(GTK_LABEL(shinfo->dgs_label), dstring); 
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -2001,6 +2130,7 @@ int main(int argc, char *argv[]) {
     gtk_grid_attach(GTK_GRID(grid), button22, 8, 13, 2, 1);
     g_signal_connect(button21, "clicked", G_CALLBACK(on_savetie_clicked), &gravtie);
     g_signal_connect(button1, "clicked", G_CALLBACK(on_readtie_clicked), &gravtie);
+    g_signal_connect(button22, "clicked", G_CALLBACK(on_write_report), &gravtie);
 
     ////////////////////////////////////////////////////////////////////////
     // final stages for cleanup
