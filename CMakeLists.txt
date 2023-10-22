@@ -16,7 +16,7 @@ add_executable(gravgui ${SOURCES})
 target_compile_features(gravgui PRIVATE cxx_std_11)
 
 # specify gtk+3 library from brew
-link_directories(/usr/local/Cellar/gtk+3/3.24.38)
+link_directories(/usr/local/opt/gtk+3)
 
 # Find and link GTK
 find_package(PkgConfig REQUIRED)
