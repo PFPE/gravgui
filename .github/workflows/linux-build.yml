@@ -18,8 +18,13 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
+    - name: conda install gtk3
+      run: |
+          $CONDA/bin/conda install -c conda-forge gtk3
+
     - name: Configure and build project
       run: |
+        $CONDA/bin/conda activate base
         mkdir build
         cd build
         cmake ..
