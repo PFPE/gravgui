@@ -18,9 +18,9 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: conda install gtk3
+    - name: install libgtk-3-dev
       run: |
-          $CONDA/bin/conda install -c conda-forge gtk3
+          sudo apt install libgtk-3-dev
 
     - name: Configure and build project
       run: |
