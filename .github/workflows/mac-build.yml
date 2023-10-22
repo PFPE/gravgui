@@ -18,10 +18,6 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: install pkg-config first
-      run: |
-          brew install pkg-config
-
     - name: install gtk libraries and cross fingers
       run: |
           brew install gtk+3
