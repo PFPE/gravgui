@@ -130,6 +130,38 @@ struct tie {  // struct for holding an entire tie!
 // functions for reading files
 ////////////////////////////////////////////////////////////////////////
 
+time_t my_timegm(struct tm * t)
+/* struct tm to seconds since Unix epoch */
+{
+    long year;
+    time_t result;
+#define MONTHSPERYEAR   12      /* months per calendar year */
+    static const int cumdays[MONTHSPERYEAR] =
+        { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 };
+
+    /*@ +matchanyintegral @*/
+    year = 1900 + t->tm_year + t->tm_mon / MONTHSPERYEAR;
+    result = (year - 1970) * 365 + cumdays[t->tm_mon % MONTHSPERYEAR];
+    result += (year - 1968) / 4;
+    result -= (year - 1900) / 100;
+    result += (year - 1600) / 400;
+    if ((year % 4) == 0 && ((year % 100) != 0 || (year % 400) == 0) &&
+        (t->tm_mon % MONTHSPERYEAR) < 2)
+        result--;
+    result += t->tm_mday - 1;
+    result *= 24;
+    result += t->tm_hour;
+    result *= 60;
+    result += t->tm_min;
+    result *= 60;
+    result += t->tm_sec;
+    if (t->tm_isdst == 1)
+        result -= 3600;
+    /*@ -matchanyintegral @*/
+    return (result);
+}
+
+
 // read stations.db and save key="VALUE" pairs in a map of maps
 std::map<std::string, std::map<std::string, std::string>> readStationFile(const std::string& filePath) {
     std::map<std::string, std::map<std::string, std::string>> stationData;
@@ -318,7 +350,7 @@ std::pair<std::vector<float>, std::vector<std::time_t>> read_dat_dgs(const std::
                 timestamp.tm_hour = hour;
                 timestamp.tm_min = minute;
                 timestamp.tm_sec = second;
-                time_t outtime = std::mktime(&timestamp);
+                time_t outtime = my_timegm(&timestamp); //std::mktime(&timestamp);
                 stamps.push_back(outtime);
 
             } else if (ship == "R/V Thompson") {
@@ -328,7 +360,7 @@ std::pair<std::vector<float>, std::vector<std::time_t>> read_dat_dgs(const std::
                 std::tm timestamp = {};
 
                 if (strptime(datetime_str.c_str(), "%m/%d/%Y-%H:%M:%S", &timestamp) != nullptr) {
-                    time_t outtime = std::mktime(&timestamp);
+                    time_t outtime = my_timegm(&timestamp);  //std::mktime(&timestamp);
                     stamps.push_back(outtime);
                 }
             } 
@@ -494,7 +526,7 @@ void toml_to_tie(const std::string& filePath, tie* gravtie) {
                 if (key.substr(2,4)==".t"){
                     std::tm timestamp = {};
                     if (strptime(value.c_str(), "%Y-%m-%dT%H:%M:%SZ", &timestamp) != nullptr) {
-                        time_t outtime = std::mktime(&timestamp);
+                        time_t outtime = my_timegm(&timestamp); //std::mktime(&timestamp);
                         if (key.substr(0,2)=="a1") gravtie->acounts[0].t1 = outtime;
                         if (key.substr(0,2)=="a2") gravtie->acounts[1].t1 = outtime;
                         if (key.substr(0,2)=="a3") gravtie->acounts[2].t1 = outtime;
@@ -1118,25 +1150,15 @@ void on_timestamp_button(GtkWidget *widget, gpointer data) {
         gtk_entry_set_text(GTK_ENTRY(hval->en1), buffer);  // in case of invalid entry -> 0
 
         // Get the current timestamp
-        time_t rawtime;
-        struct tm * utctime;
-        struct tm * thistime;
-        std::time ( &rawtime );
-        thistime = std::localtime(&rawtime);
-        if (thistime->tm_isdst) {
-            //std::cout<< "EDT" << std::endl;
-            thistime->tm_hour -= 1;
-        }
-        time_t local_standard = std::mktime(thistime);
-        utctime = gmtime(&local_standard);
-        time_t current_time = std::mktime(utctime);
-        //std::string timestamp = std::ctime(&current_time);
-        //std::cout << std::asctime(utctime) << std::endl;
-        //std::cout << timestamp << std::endl;
+        time_t measuredtime;
+        std::time ( &measuredtime ); // seconds since epoch, in UTC automatically
+        //struct tm * thistime;
+        //thistime = std::gmtime(&measuredtime);
+        //std::cout << std::asctime(thistime) << std::endl;
 
         // Update the struct with the text and timestamp
         hval->h1 = num;
-        hval->t1 = current_time; //timestamp;  // using time_t instead of timestamp here
+        hval->t1 = measuredtime; //timestamp;  // using time_t instead of timestamp here
 
         // lock the field and the save button so things don't change
         gtk_widget_set_sensitive(GTK_WIDGET(hval->en1), FALSE);
