@@ -1,0 +1,33 @@
+name: Build gravgui
+
+#on: [push]
+
+on: [workflow_dispatch]
+
+#on:
+#  workflow_run:
+#    workflows: ["Your Workflow Name"]
+#    types:
+#      - manual
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Configure and build project
+      run: |
+        mkdir build
+        cd build
+        cmake ..
+        make
+
+    - name: Upload executable
+      uses: actions/upload-artifact@v2
+      with:
+        name: gravgui
+        path: build/gravgui
+
