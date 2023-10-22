@@ -64,7 +64,7 @@ struct sta_info { // struct for station name, db, k/v info, buttons, etc
     std::string station="";
     std::string alt_station="";
     float station_gravity = -999;
-    std::map<std::string, std::map<std::string, std::string>> station_db;  // save for key/values
+    std::map<std::string, std::map<std::string, std::string> > station_db;  // save for key/values
     std::map<std::string, std::string> this_station; // k/v pairs for selected station
     GtkWidget *en1;  // entry for "other" station
     GtkWidget *bt1;  // save button
@@ -94,7 +94,7 @@ struct lm_info { // name, brackets, factors, offsets for calibration of landmete
     std::string cal_file_path="";
     bool landtie = FALSE;
     double land_tie_value = -999; // used instead of station_gravity if landtie
-    std::map<std::string, std::map<std::string, std::string>> landmeter_db; // names+paths
+    std::map<std::string, std::map<std::string, std::string> > landmeter_db; // names+paths
     calibration calib; // three vectors in a struct
     GtkWidget *en1;  // entry for "other" meter
     GtkWidget *bt1;  // save button
@@ -163,8 +163,8 @@ time_t my_timegm(struct tm * t)
 
 
 // read stations.db and save key="VALUE" pairs in a map of maps
-std::map<std::string, std::map<std::string, std::string>> readStationFile(const std::string& filePath) {
-    std::map<std::string, std::map<std::string, std::string>> stationData;
+std::map<std::string, std::map<std::string, std::string> > readStationFile(const std::string& filePath) {
+    std::map<std::string, std::map<std::string, std::string> > stationData;
     std::ifstream inputFile(filePath);
 
     if (!inputFile.is_open()) {
@@ -217,8 +217,8 @@ std::map<std::string, std::map<std::string, std::string>> readStationFile(const 
 }
 
 // read landmeters.db and save meter names and cal table paths in a map
-std::map<std::string, std::map<std::string, std::string>> readMeterFile(const std::string& filePath) {
-    std::map<std::string, std::map<std::string, std::string>> meterData;
+std::map<std::string, std::map<std::string, std::string> > readMeterFile(const std::string& filePath) {
+    std::map<std::string, std::map<std::string, std::string> > meterData;
     std::ifstream inputFile(filePath);
 
     if (!inputFile.is_open()) {
@@ -304,7 +304,7 @@ calibration read_lm_calib(const std::string& filePath) {
 }
 
 // function for reading a DGS laptop file and returning timestamps and grav values
-std::pair<std::vector<float>, std::vector<std::time_t>> read_dat_dgs(const std::vector<std::string>& file_paths, const std::string& ship) {
+std::pair<std::vector<float>, std::vector<std::time_t> > read_dat_dgs(const std::vector<std::string>& file_paths, const std::string& ship) {
     std::vector<float> rgrav;
     std::vector<time_t> stamps;
 
@@ -400,7 +400,7 @@ void tie_to_toml(const std::string& filepath, tie* gravtie) {
     outputFile << "land_tie_value=" << std::fixed << std::setprecision(2) << gravtie->lminfo.land_tie_value << std::endl;
     outputFile << "drift=" << std::fixed << std::setprecision(2) << gravtie->drift<< std::endl;
     // all the counts and milligals etc
-    std::vector<std::vector<val_time>> allcounts{gravtie->acounts, gravtie->bcounts, gravtie->ccounts};
+    std::vector<std::vector<val_time> > allcounts{gravtie->acounts, gravtie->bcounts, gravtie->ccounts};
     char letter = 'a';
     for (const std::vector<val_time>& thesecounts : allcounts) {
         int num = 1;
@@ -647,7 +647,7 @@ void toml_to_tie(const std::string& filePath, tie* gravtie) {
         gtk_widget_set_sensitive(GTK_WIDGET(gravtie->lminfo.cb1), FALSE);
     }
     // a/b/c/h: values, saves
-    std::vector<std::vector<val_time>> allcounts{gravtie->acounts, gravtie->bcounts, gravtie->ccounts, gravtie->heights};
+    std::vector<std::vector<val_time> > allcounts{gravtie->acounts, gravtie->bcounts, gravtie->ccounts, gravtie->heights};
     for (std::vector<val_time>& thesecounts : allcounts) {
         for (val_time& thisone : thesecounts) {
             if (thisone.h1 > 0) {
@@ -1207,7 +1207,7 @@ static void on_dgs_filebrowse_clicked(GtkWidget *button, gpointer data) {
                 selectedFiles.push_back(filename);
             }
             // read the file into a pair of vectors
-            std::pair<std::vector<float>, std::vector<time_t>> datadata = read_dat_dgs(selectedFiles,shinfo->ship);
+            std::pair<std::vector<float>, std::vector<time_t> > datadata = read_dat_dgs(selectedFiles,shinfo->ship);
             // push back into shinfo - can add to existing vector, will not ovrwrite
             shinfo->gravgrav.insert(shinfo->gravgrav.end(),datadata.first.begin(), datadata.first.end());
             shinfo->gravtime.insert(shinfo->gravtime.end(),datadata.second.begin(), datadata.second.end());
@@ -1508,7 +1508,7 @@ static void landtie_switch_callback(GtkSwitch *switch_widget, gboolean state, gp
     if (state) {
         gravtie->lminfo.landtie = TRUE;
 
-        std::vector<std::vector<val_time>> allcounts{gravtie->acounts, gravtie->bcounts, gravtie->ccounts};
+        std::vector<std::vector<val_time> > allcounts{gravtie->acounts, gravtie->bcounts, gravtie->ccounts};
         for (std::vector<val_time>& thesecounts : allcounts) {
             for (val_time& thisone : thesecounts) {
                 gtk_widget_set_sensitive(GTK_WIDGET(thisone.bt2), TRUE);  // turn on all reset buttons
@@ -1528,7 +1528,7 @@ static void landtie_switch_callback(GtkSwitch *switch_widget, gboolean state, gp
     } else {
         gravtie->lminfo.landtie = FALSE;
 
-        std::vector<std::vector<val_time>> allcounts{gravtie->acounts, gravtie->bcounts, gravtie->ccounts};
+        std::vector<std::vector<val_time> > allcounts{gravtie->acounts, gravtie->bcounts, gravtie->ccounts};
         for (std::vector<val_time>& thesecounts : allcounts) {
             for (val_time& thisone : thesecounts) {
                 gtk_widget_set_sensitive(GTK_WIDGET(thisone.bt2), FALSE);
@@ -1751,7 +1751,7 @@ int main(int argc, char *argv[]) {
 
     // read in all the stations, make a dropdown for them as well
     std::string filePath = "database/stations.db"; // fixed path to stations db file
-    std::map<std::string, std::map<std::string, std::string>> stationData = readStationFile(filePath);
+    std::map<std::string, std::map<std::string, std::string> > stationData = readStationFile(filePath);
     gravtie.stinfo.station_db = stationData;
 
     // Create a combo box for the list of stations
@@ -1827,7 +1827,7 @@ int main(int argc, char *argv[]) {
 
     // read in all the meters, make a dropdown for them as well
     std::string filePath1 = "database/landmeters.db"; // fixed path to meters db file
-    std::map<std::string, std::map<std::string, std::string>> meterData = readMeterFile(filePath1);
+    std::map<std::string, std::map<std::string, std::string> > meterData = readMeterFile(filePath1);
     gravtie.lminfo.landmeter_db = meterData;
 
     // Create a combo box for the list of stations
