@@ -21,6 +21,7 @@ jobs:
     - name: install gtk libraries and cross fingers
       run: |
           brew install gtk+3
+          brew --prefix gtk+3
 
     - name: Configure and build project
       run: |
