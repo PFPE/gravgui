@@ -24,7 +24,6 @@ jobs:
 
     - name: Configure and build project
       run: |
-        $CONDA/bin/conda activate base
         mkdir build
         cd build
         cmake ..
