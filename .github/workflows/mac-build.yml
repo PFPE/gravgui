@@ -1,0 +1,37 @@
+name: Build gravgui for mac
+
+#on: [push]
+
+on: [workflow_dispatch]
+
+#on:
+#  workflow_run:
+#    workflows: ["Your Workflow Name"]
+#    types:
+#      - manual
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: install gtk libraries and cross fingers
+      run: |
+          brew install gtk+3
+
+    - name: Configure and build project
+      run: |
+        mkdir build
+        cd build
+        cmake ..
+        make
+
+    - name: Upload executable
+      uses: actions/upload-artifact@v3
+      with:
+        name: gravgui-mos
+        path: build/gravgui
+
