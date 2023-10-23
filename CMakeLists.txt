@@ -15,9 +15,6 @@ add_executable(gravgui ${SOURCES})
 # Set C++11 standard
 target_compile_features(gravgui PRIVATE cxx_std_11)
 
-## specify gtk+3 library from brew
-#link_directories(/usr/local/opt/gtk+3)
-
 # Find and link GTK
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
