@@ -21,14 +21,14 @@ jobs:
     - name: install gtk libraries and cross fingers
       run: |
           brew install gtk+3
-          which gcc
-          which g++
 
     - name: Configure and build project
       run: |
+        export CC=/usr/bin/gcc
+        export CXX=/usr/bin/g++
         mkdir build
         cd build
-        cmake -D CMAKE_C_COMPILER=gcc-11 -D CMAKE_CXX_COMPILER=g++ ..
+        cmake ..
         make
 
     - name: Upload executable
