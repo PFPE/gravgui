@@ -38,8 +38,8 @@ jobs:
       run: |
         mkdir linux-download
         mv gravgui linux-download/
-        cp -r databse linux-download/
-        cp style.css linux-download
+        cp -r database linux-download/
+        cp style.css linux-download/
 
     - name: Upload zipped executable and deps
       uses: actions/upload-artifact@v3
