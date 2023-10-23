@@ -31,13 +31,12 @@ jobs:
       run: |
         mkdir macos-download
         mv gravgui macos-download/
-        cp -r database/ macos-download/
+        cp -r database macos-download/
         cp style.css macos-download/
-        zip -r macos-download.zip macos-download/
 
     - name: Upload zipped executable and deps
       uses: actions/upload-artifact@v3
       with:
         name: gravgui-mos
-        path: macos-download.zip
+        path: macos-download/
 
