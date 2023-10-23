@@ -9,6 +9,9 @@ old/*
 *.toml
 !example.toml
 
+# no report files
+tie_*.txt
+
 # do not track the executable from local, do not track local build dir
 gravgui
 build/*
