@@ -24,11 +24,9 @@ jobs:
 
     - name: Configure and build project
       run: |
-        export CC=/usr/bin/gcc
-        export CXX=/usr/bin/g++
         mkdir build
         cd build
-        cmake ..
+        cmake -D CMAKE_C_COMPILER=/usr/bin/gcc -D CMAKE_CXX_COMPILER=/usr/bin/g++ ..
         make
 
     - name: Upload executable
