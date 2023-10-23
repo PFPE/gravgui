@@ -23,7 +23,9 @@ The file `example.toml` shows the format of a tie that has been written out from
 
 ## TODO
 docs\
-actions build binaries (test on windows and mac)\
+windows actions build binaries\
+mac test exec - gtk and xquartz? fancier things?\
+chmod\
 option for manual timestamp entry?\
 modularity/header files
 
