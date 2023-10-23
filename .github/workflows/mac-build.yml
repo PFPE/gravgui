@@ -32,8 +32,8 @@ jobs:
     - name: build the other way
       run: |
         /usr/bin/gcc -I. -c window_functions.c
-        /usr/bin/g++ -O3 -I. -c filt.cpp
-        /usr/bin/g++ -O3 -I. gravgui.cpp filt.o window_functions.o -lm $(pkg-config --cflags --libs gtk+-3.0) -o gravgui
+        /usr/bin/g++ -O3 -I. -std=c++11 -c filt.cpp
+        /usr/bin/g++ -O3 -I. -std=c++11 gravgui.cpp filt.o window_functions.o -lm $(pkg-config --cflags --libs gtk+-3.0) -o gravgui
 
     - name: Upload executable
       uses: actions/upload-artifact@v3
