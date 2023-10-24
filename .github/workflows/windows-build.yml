@@ -13,11 +13,11 @@ jobs:
 
     - name: pacman install gcc base stuff
       run: |
-        C:\msys64\usr\bin\pacman.exe -S mingw-w64-ucrt-x86_64-gcc
+        C:\msys64\usr\bin\pacman.exe -S --noconfirm mingw-w64-ucrt-x86_64-gcc
 
     - name: pacman install gtk3
       run: |
-        C:\msys64\usr\bin\pacman.exe -S mingw-w64-ucrt-x86_64-gtk3
+        C:\msys64\usr\bin\pacman.exe -S --noconfirm mingw-w64-ucrt-x86_64-gtk3
 
 
 #    - name: window functions
