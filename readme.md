@@ -3,19 +3,14 @@ This repository contains software for computing gravity ties. The primary way to
 
 ## Installation instructions
 ### C++ executable
-Pre-compiled binaries for Windows, MacOS, and Linux are *not yet* available but they will be, once I figure out github actions.
+Pre-compiled binaries for Windows, MacOS, and Ubuntu Linux are *not yet* available but they will be, once I figure out github actions. They will still need to be run within a terminal, but fear not, that is quite easy! Unless you are running windows, in which case, sorry and best of luck.
 
-In the meantime, everything can be compiled on your local machine using gcc/g++ provided you have the requisite gtk3 libraries installed. To do this with cmake, run the following:
+In the meantime, everything can be compiled on your local machine using gcc/g++ provided you have the requisite gtk3 libraries installed. There is a makefile provided that you can use if you have `make` installed (and also `pkg-config`).
 
-`mkdir build`  
-`cd build`  
-`cmake ..`  
-`make`
-
-To do this without cmake, you can run the provided `make_gui` script in your favorite shell.
+If you're starting with a fresh install of ubuntu 22.04, you will need to install libgtk-3-dev at minimum (probably also make, maybe also gcc and g++).
 
 ## Usage
-Run the compiled program from a terminal. Instructions for how to set this up with a launcher/icon in the more familiar way will be added if I ever figure out how to do that.
+Run the compiled program from a terminal.
 
 ## Documentation
 Feel free to dive into the code comments, for now! A full manual for the GUI is in the works and will be added here once it exists.
