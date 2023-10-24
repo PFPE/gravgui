@@ -1,4 +1,4 @@
-name: Build gravgui for mac
+name: Build gravgui for windows
 
 #on: [push]
 on: [workflow_dispatch]
