@@ -13,7 +13,7 @@ jobs:
 
     - name: pacman install gtk3
       run: |
-        C:\msys64\usr\bin\bash.exe pacman -S mingw-w64-ucrt-x86_64-gtk3
+        C:\msys64\usr\bin\pacman.exe -S mingw-w64-ucrt-x86_64-gtk3
 
 
 #    - name: window functions
