@@ -161,6 +161,26 @@ time_t my_timegm(struct tm * t)
     return (result);
 }
 
+std::tm str_to_tm(const char* datestr, int tflag) {
+    std::tm t = {};
+
+    if (tflag == 1) {
+        if (std::sscanf(datestr, "%d/%d/%d-%d:%d:%d", &t.tm_mon, &t.tm_mday, &t.tm_year, &t.tm_hour, &t.tm_min, &t.tm_sec) != 6) {
+            return t;  // todo more consequences here?
+        }
+    }
+    if (tflag == 2) {
+        if (std::sscanf(datestr, "%d-%d-%dT%d:%d:%dZ", &t.tm_year, &t.tm_mon, &t.tm_mday, &t.tm_hour, &t.tm_min, &t.tm_sec) != 6) {
+            return t;  // todo more consequences here?
+        }
+    }
+
+    t.tm_year -= 1900;
+    --t.tm_mon;
+    t.tm_isdst = -1;
+    return t;
+}
+
 
 // read stations.db and save key="VALUE" pairs in a map of maps
 std::map<std::string, std::map<std::string, std::string> > readStationFile(const std::string& filePath) {
@@ -357,12 +377,13 @@ std::pair<std::vector<float>, std::vector<std::time_t> > read_dat_dgs(const std:
 
                 rgrav.push_back(std::stof(tokens[3]));
                 std::string datetime_str = tokens[0] + "-" + tokens[1];
-                std::tm timestamp = {};
 
-                if (strptime(datetime_str.c_str(), "%m/%d/%Y-%H:%M:%S", &timestamp) != nullptr) {
+                std::tm timestamp = str_to_tm(datetime_str.c_str(), 1);
+                //std::tm timestamp = {};
+                //if (strptime(datetime_str.c_str(), "%m/%d/%Y-%H:%M:%S", &timestamp) != nullptr) {
                     time_t outtime = my_timegm(&timestamp);  //std::mktime(&timestamp);
                     stamps.push_back(outtime);
-                }
+                //}
             } 
         }
         file.close();
@@ -524,8 +545,9 @@ void toml_to_tie(const std::string& filePath, tie* gravtie) {
 
                 // key matchups for timestamps: the most annoying part
                 if (key.substr(2,4)==".t"){
-                    std::tm timestamp = {};
-                    if (strptime(value.c_str(), "%Y-%m-%dT%H:%M:%SZ", &timestamp) != nullptr) {
+                    std::tm timestamp = str_to_tm(value.c_str(), 2);
+                    //std::tm timestamp = {};
+                    //if (strptime(value.c_str(), "%Y-%m-%dT%H:%M:%SZ", &timestamp) != nullptr) {
                         time_t outtime = my_timegm(&timestamp); //std::mktime(&timestamp);
                         if (key.substr(0,2)=="a1") gravtie->acounts[0].t1 = outtime;
                         if (key.substr(0,2)=="a2") gravtie->acounts[1].t1 = outtime;
@@ -539,7 +561,7 @@ void toml_to_tie(const std::string& filePath, tie* gravtie) {
                         if (key.substr(0,2)=="h1") gravtie->heights[0].t1 = outtime;
                         if (key.substr(0,2)=="h2") gravtie->heights[1].t1 = outtime;
                         if (key.substr(0,2)=="h3") gravtie->heights[2].t1 = outtime;
-                    }
+                    //}
                 }
             }
         }
