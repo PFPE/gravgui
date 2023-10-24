@@ -1,0 +1,43 @@
+name: Build gravgui for mac
+
+#on: [push]
+on: [workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: pacman install gtk3
+      run: |
+        C:\msys64\usr\bin\bash.exe pacman -S mingw-w64-ucrt-x86_64-gtk3
+
+
+#    - name: window functions
+#      run: |
+#        /usr/bin/gcc -I. -c window_functions.c
+#
+#    - name: filter windows
+#      run: |
+#        /usr/bin/g++ -O3 -I. -std=c++11 -c filt.cpp
+#
+#    - name: make gravgui
+#      run: |
+#        /usr/bin/g++ -O3 -I. -std=c++11 gravgui.cpp filt.o window_functions.o -lm $(pkg-config --cflags --libs gtk+-3.0) -o gravgui
+
+#    - name: package stuff
+#      run: |
+#        mkdir macos-download
+#        mv gravgui macos-download/
+#        cp -r database macos-download/
+#        cp style.css macos-download/
+#
+#    - name: Upload zipped executable and deps
+#      uses: actions/upload-artifact@v3
+#      with:
+#        name: gravgui-mos
+#        path: macos-download/
+
