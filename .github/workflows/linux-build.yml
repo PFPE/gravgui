@@ -36,6 +36,7 @@ jobs:
 
     - name: package stuff
       run: |
+        chmod +x gravgui
         mkdir linux-download
         mv gravgui linux-download/
         cp -r database linux-download/
