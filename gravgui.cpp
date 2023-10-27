@@ -92,6 +92,8 @@ struct lm_info { // name, brackets, factors, offsets for calibration of landmete
     std::string meter="";
     std::string alt_meter="";
     std::string cal_file_path="";
+    float ship_lon = -999;
+    float ship_lat = -999;
     bool landtie = FALSE;
     double land_tie_value = -999; // used instead of station_gravity if landtie
     std::map<std::string, std::map<std::string, std::string> > landmeter_db; // names+paths
@@ -104,6 +106,10 @@ struct lm_info { // name, brackets, factors, offsets for calibration of landmete
     GtkWidget *lts;  // toggle switch
     GtkWidget *cal_label; // label for cal table read
     GtkWidget *lt_label; // label for calculated land tie val
+    GtkWidget *en_lon;
+    GtkWidget *en_lat;
+    GtkWidget *bt_coords;
+    GtkWidget *br_coords;
 };
 
 struct tie {  // struct for holding an entire tie!
@@ -122,7 +128,7 @@ struct tie {  // struct for holding an entire tie!
     GtkWidget *bias_label;
     double avg_height=-999;
     double water_grav=-999; // byproduct of bias calc that we might want to write somewhere?
-    double avg_dgs_grav=-999; // filtered sliced average grav over h1/h2/h3 time window
+    double avg_dgs_grav=-99999; // filtered sliced average grav over h1/h2/h3 time window
     double drift=-999999; // byproduct of land tie calc
 };
 
@@ -166,12 +172,12 @@ std::tm str_to_tm(const char* datestr, int tflag) {
 
     if (tflag == 1) {
         if (std::sscanf(datestr, "%d/%d/%d-%d:%d:%d", &t.tm_mon, &t.tm_mday, &t.tm_year, &t.tm_hour, &t.tm_min, &t.tm_sec) != 6) {
-            return t;  // todo more consequences here?
+            return t;  // TODO more consequences here?
         }
     }
     if (tflag == 2) {
         if (std::sscanf(datestr, "%d-%d-%dT%d:%d:%dZ", &t.tm_year, &t.tm_mon, &t.tm_mday, &t.tm_hour, &t.tm_min, &t.tm_sec) != 6) {
-            return t;  // todo more consequences here?
+            return t;  // TODO more consequences here?
         }
     }
 
@@ -1158,6 +1164,42 @@ static void on_lm_filebrowse_clicked(GtkWidget *button, gpointer data) {
 
 }
 
+// callback function for saving ship coordinates for a land tie
+void on_lm_coordsave_button(GtkWidget *widget, gpointer data) {
+    lm_info* lminfo = static_cast<lm_info*>(data);
+    const gchar *lonlon = gtk_entry_get_text(GTK_ENTRY(lminfo->en_lon));
+    const gchar *latlat = gtk_entry_get_text(GTK_ENTRY(lminfo->en_lat));
+    if (lonlon != NULL && lonlon[0] != '\0' && latlat != NULL && latlat[0] != '\0') {
+        float nlon = atof(lonlon);
+        float nlat = atof(latlat);
+        lminfo->ship_lon = nlon;
+        lminfo->ship_lat = nlat;
+
+        char buff1[7];
+        snprintf(buff1, sizeof(buff1), "%.3f", nlon);
+        char buff2[7];
+        snprintf(buff2, sizeof(buff2), "%.3f", nlat);
+        gtk_entry_set_text(GTK_ENTRY(lminfo->en_lon), buff1);
+        gtk_entry_set_text(GTK_ENTRY(lminfo->en_lat), buff2);
+
+        gtk_widget_set_sensitive(GTK_WIDGET(lminfo->en_lon), FALSE);
+        gtk_widget_set_sensitive(GTK_WIDGET(lminfo->en_lat), FALSE);
+        gtk_widget_set_sensitive(GTK_WIDGET(lminfo->bt_coords), FALSE);
+    }
+}
+
+// callback function for reseting ship coordinates for a land tie
+void on_lm_coordreset_button(GtkWidget *widget, gpointer data) {
+    lm_info* lminfo = static_cast<lm_info*>(data);
+    lminfo->ship_lon = -999;
+    lminfo->ship_lat = -999;
+    gtk_entry_set_text(GTK_ENTRY(lminfo->en_lon), "");
+    gtk_entry_set_text(GTK_ENTRY(lminfo->en_lat), "");
+    gtk_widget_set_sensitive(GTK_WIDGET(lminfo->en_lon), TRUE);
+    gtk_widget_set_sensitive(GTK_WIDGET(lminfo->en_lat), TRUE);
+    gtk_widget_set_sensitive(GTK_WIDGET(lminfo->bt_coords), TRUE);
+}
+
 // callback function for clicking a button and saving a value+timestamp
 void on_timestamp_button(GtkWidget *widget, gpointer data) {
     // Cast data back to a pointer to MyData
@@ -1259,7 +1301,7 @@ void on_compute_bias(GtkWidget *button, gpointer data) {
     std::vector<float> heights;  // get all heights and timestamps for water grav calc
     std::vector<time_t> height_stamps;
     double water_grav=-999;
-    double avg_dgs_grav=-999;
+    double avg_dgs_grav=-99999;
     double pier_grav;
     double avg_height=-999;
 
@@ -1413,7 +1455,7 @@ void on_clear_bias(GtkWidget *button, gpointer data) {
     tie* gravtie = static_cast<tie*>(data);  // we def need the whole tie for this one
 
     gravtie->bias = -999;
-    gravtie->avg_dgs_grav = -999;
+    gravtie->avg_dgs_grav = -99999;
     gravtie->water_grav = -999;
 
     std::stringstream strm;
@@ -1530,6 +1572,13 @@ static void landtie_switch_callback(GtkSwitch *switch_widget, gboolean state, gp
     if (state) {
         gravtie->lminfo.landtie = TRUE;
 
+        if (gravtie->lminfo.ship_lon < 0) {
+            gtk_widget_set_sensitive(GTK_WIDGET(gravtie->lminfo.en_lon), TRUE);
+            gtk_widget_set_sensitive(GTK_WIDGET(gravtie->lminfo.en_lat), TRUE);
+            gtk_widget_set_sensitive(GTK_WIDGET(gravtie->lminfo.bt_coords), TRUE);
+        }
+        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->lminfo.br_coords), TRUE);
+
         std::vector<std::vector<val_time> > allcounts{gravtie->acounts, gravtie->bcounts, gravtie->ccounts};
         for (std::vector<val_time>& thesecounts : allcounts) {
             for (val_time& thisone : thesecounts) {
@@ -1549,6 +1598,11 @@ static void landtie_switch_callback(GtkSwitch *switch_widget, gboolean state, gp
         }
     } else {
         gravtie->lminfo.landtie = FALSE;
+
+        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->lminfo.en_lon), FALSE);
+        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->lminfo.en_lat), FALSE);
+        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->lminfo.bt_coords), FALSE);
+        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->lminfo.br_coords), FALSE);
 
         std::vector<std::vector<val_time> > allcounts{gravtie->acounts, gravtie->bcounts, gravtie->ccounts};
         for (std::vector<val_time>& thesecounts : allcounts) {
@@ -1673,7 +1727,7 @@ int main(int argc, char *argv[]) {
     // Create the main window
     GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_title(GTK_WINDOW(window), "gravgui v1.0");
-    gtk_window_set_default_size(GTK_WINDOW(window), 800, 600);
+    gtk_window_set_default_size(GTK_WINDOW(window), 600, 600);
     gtk_container_set_border_width(GTK_CONTAINER(window), 10);
 
     // Create a grid and put it in the window
@@ -2120,6 +2174,27 @@ int main(int argc, char *argv[]) {
     g_signal_connect(G_OBJECT(landtie_switch), "state-set", G_CALLBACK(landtie_switch_callback), &gravtie);
     gtk_grid_attach(GTK_GRID(grid), landtie_label, 0, 3, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), landtie_switch, 1, 3, 1, 1);
+
+    GtkWidget *lt_lon = gtk_entry_new();
+    gtk_entry_set_placeholder_text(GTK_ENTRY(lt_lon), "Ship longitude");
+    GtkWidget *lt_lat = gtk_entry_new();
+    gtk_entry_set_placeholder_text(GTK_ENTRY(lt_lat), "Ship latitude");
+    gtk_grid_attach(GTK_GRID(grid), lt_lon, 2, 3, 2, 1);
+    gtk_grid_attach(GTK_GRID(grid), lt_lat, 4, 3, 2, 1);
+    gtk_widget_set_sensitive(GTK_WIDGET(lt_lon), FALSE);
+    gtk_widget_set_sensitive(GTK_WIDGET(lt_lat), FALSE);
+    GtkWidget *b_lt_coords = gtk_button_new_with_label("save coords");
+    gtk_grid_attach(GTK_GRID(grid), b_lt_coords, 6, 3, 1, 1);
+    gtk_widget_set_sensitive(GTK_WIDGET(b_lt_coords), FALSE);
+    GtkWidget *br_coords = gtk_button_new_with_label("reset coords");
+    gtk_grid_attach(GTK_GRID(grid), br_coords, 7, 3, 1, 1);
+    gtk_widget_set_sensitive(GTK_WIDGET(br_coords), FALSE);
+    gravtie.lminfo.en_lon = lt_lon;
+    gravtie.lminfo.en_lat = lt_lat;
+    gravtie.lminfo.bt_coords = b_lt_coords;
+    gravtie.lminfo.br_coords = br_coords;
+    g_signal_connect(b_lt_coords, "clicked", G_CALLBACK(on_lm_coordsave_button), &gravtie.lminfo);
+    g_signal_connect(br_coords, "clicked", G_CALLBACK(on_lm_coordreset_button), &gravtie.lminfo);
 
     GtkWidget *ltval_label = gtk_label_new("Land tie value: ");
     gtk_label_set_xalign(GTK_LABEL(ltval_label), 0.0);  // right-justify the text
