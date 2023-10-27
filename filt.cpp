@@ -43,6 +43,11 @@
 #include "window_functions.h"
 #define ECODE(x) {m_error_flag = x; return;}
 
+#ifndef M_PI  // this is for windows compilation
+    #define _USE_MATH_DEFINES
+    #include <cmath>
+#endif
+
 // Handles LPF and HPF case
 Filter::Filter(filterType filt_t, int num_taps, double Fs, double Fx)
 {
