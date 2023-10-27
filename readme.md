@@ -3,7 +3,7 @@ This repository contains software for computing gravity ties. The primary way to
 
 ## Installation instructions
 ### C++ executable
-Pre-compiled binaries for Windows, MacOS, and Ubuntu Linux are *not yet* available but they will be, once I figure out github actions. They will still need to be run within a terminal, but fear not, that is quite easy! Unless you are running windows, in which case, sorry and best of luck.
+Pre-compiled binaries for Windows, MacOS, and Ubuntu Linux are *not yet* available but they will be, once I figure out github actions. They will still need to be run within a terminal, but fear not, that's easy!
 
 In the meantime, everything can be compiled on your local machine using gcc/g++ provided you have the requisite gtk3 libraries installed. There is a makefile provided that you can use if you have `make` installed (and also `pkg-config`).
 
@@ -17,21 +17,19 @@ Feel free to dive into the code comments, for now! A full manual for the GUI is 
 The file `example.toml` shows the format of a tie that has been written out from the GUI (just to a file, not to a report). The format is TOML-compliant (v1.0.0). 
 
 ## TODO
-docs\
+docs and docs action for build\
 land meter temperature, ship elevation\
-windows actions build binaries\
-releases instead of actions page archives\
+releases (with chmod) instead of actions page archives\
 mac test exec - gtk and xquartz? fancier things?\
-chmod\
-option for manual timestamp entry?\
 modularity/header files
 
 ### would be nice someday
 clean up filter + window function libraries\
 grav plotting? with filtering outside of bias calc?\
-metric/imperial switch\
+metric/imperial switch?\
 raw data read (vs laptop)\
+manual timestamp entry vs toml editing?\
 styling via css and logic for it
 
 # Python command line tie utility
-Some Python (3+) scripts for the same gravity tie calculations are also included in this repository. The dependencies are `numpy` and `scipy`. `tie_functions.py` contains a custom `tie` class with lots of methods for computing bias etc, and `gravity_tie_cmd.py` runs several of those methods in sequence, with command line prompts for the user to enter pier water heights, counts, etc. Note that neither Python file is complete. The contents could, however, be used as building blocks for anyone who wants to do ties in Python and also these things are easier to read than C++ if you want to look at how the calculations are done. No guarantees no warranties etc etc.
+Some Python (3+) scripts for the same gravity tie calculations are also included in this repository in the `py/` directory. The dependencies are `numpy` and `scipy`. `tie_functions.py` contains a custom `tie` class with lots of methods for computing bias etc, and `gravity_tie_cmd.py` runs several of those methods in sequence, with command line prompts for the user to enter pier water heights, counts, etc. Note that neither Python file is complete. The contents could, however, be used as building blocks for anyone who wants to do ties in Python and also these things are easier to read than C++ if you want to look at how the calculations are done. No guarantees no warranties etc etc.
