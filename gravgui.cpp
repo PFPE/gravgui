@@ -124,8 +124,8 @@ struct tie {  // struct for holding an entire tie!
     std::vector<val_time> acounts{3}; // ship 1, land tie
     std::vector<val_time> bcounts{3}; // land 1, land tie
     std::vector<val_time> ccounts{3}; // ship 2, land tie
-    std::vector<double> mgal_averages;
-    std::vector<time_t> t_averages;
+    std::vector<double> mgal_averages{-999,-999,-999};
+    std::vector<time_t> t_averages{-999,-999,-999};
     double bias=-999;  // the thing we want to calculate in the end
     GtkWidget *bias_label;
     double avg_height=-999;
