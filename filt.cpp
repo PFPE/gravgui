@@ -44,8 +44,9 @@
 #define ECODE(x) {m_error_flag = x; return;}
 
 #ifndef M_PI  // this is for windows compilation
-    #define _USE_MATH_DEFINES
-    #include <cmath>
+    //#define _USE_MATH_DEFINES
+    //#include <cmath>
+    #define M_PI 3.14159265358979323846
 #endif
 
 // Handles LPF and HPF case
