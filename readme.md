@@ -18,7 +18,9 @@ The file `example.toml` shows the format of a tie that has been written out from
 
 ## TODO
 docs\
+land meter temperature, ship elevation\
 windows actions build binaries\
+releases instead of actions page archives\
 mac test exec - gtk and xquartz? fancier things?\
 chmod\
 option for manual timestamp entry?\
