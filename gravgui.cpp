@@ -638,6 +638,16 @@ void toml_to_tie(const std::string& filePath, tie* gravtie) {
             gtk_entry_set_text(GTK_ENTRY(gravtie->stinfo.en1),gravtie->stinfo.station.c_str());
         }
         gtk_widget_set_sensitive(GTK_WIDGET(gravtie->stinfo.bt1), FALSE);
+        // reset this_station so we can get number and lat/lon as needed
+        if (gravtie->stinfo.station != "Other" || gravtie->stinfo.alt_station != "") {
+            for (const auto& station : gravtie->stinfo.station_db) {
+                for (const auto& kv : station.second) {
+                    if (kv.first == "NAME" && kv.second == gravtie->stinfo.station) {
+                        gravtie->stinfo.this_station = station.second;
+                    }
+                }
+            }
+        }
 
         GtkTreeModel *stamodel = gtk_combo_box_get_model(GTK_COMBO_BOX(gravtie->stinfo.cb1));
         GtkTreeIter iter;
@@ -780,9 +790,10 @@ void write_report(const std::string& filepath, tie* gravtie) {
     outputFile << "Number: ";
     for (const auto& kv : gravtie->stinfo.this_station) {
         if (kv.first == "NUMBER") {
-            std::cout << kv.second << std::endl;
+            outputFile << kv.second;
         }
     }
+    outputFile << std::endl;
     outputFile << "Known absolute gravity (mGal): " << std::fixed << std::setprecision(3) << gravtie->stinfo.station_gravity << std::endl;
 
     outputFile << std::endl;
@@ -799,14 +810,17 @@ void write_report(const std::string& filepath, tie* gravtie) {
         outputFile << "Longitude (deg): " << std::fixed << std::setprecision(3) << gravtie->lminfo.ship_lon << std::endl;
         outputFile << "Elevation (m): " << std::endl; // TODO TODO TODO
 
-
+        std::string whichone;
         for (int i=0; i<3; i++) {
             time_t rawtime = gravtie->t_averages[i];
             struct tm * cookedtime;
             char buffer[30];
+            if (i == 0) whichone = "A1";
+            if (i == 1) whichone = "B";
+            if (i == 2) whichone = "A2";
             cookedtime = gmtime(&rawtime);
             strftime(buffer, sizeof(buffer), "%Y/%m/%d %H:%M:%S", cookedtime);
-            outputFile << "UTC time and water height to pier (m) " << i+1 << ": ";
+            outputFile << "UTC time and meter gravity (mGal) at " << whichone << ": ";
                 outputFile << buffer << " " << std::fixed << std::setprecision(3) << gravtie->mgal_averages[i] << std::endl;
         }
 
@@ -1291,7 +1305,7 @@ void on_timestamp_button(GtkWidget *widget, gpointer data) {
         //std::cout << std::asctime(thistime) << std::endl;
 
         // Update the struct with the text and timestamp
-        hval->h1 = num;
+        hval->h1 = std::abs(num); // always save as positive number bc -999 is flag for no value
         hval->t1 = measuredtime; //timestamp;  // using time_t instead of timestamp here
 
         // lock the field and the save button so things don't change
