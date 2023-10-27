@@ -8,17 +8,25 @@ jobs:
     runs-on: windows-latest
 
     steps:
+    - name: set up MSYS2 UCRT64
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: UCRT64
+        install: >-
+            mingw-w64-ucrt-x86_86-gcc
+            mingw-w64-ucrt-x86_86-gtk3
+            mingw-w64-ucrt-x86_86-pkg-config
+            make
+
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: pacman install gcc base stuff
+    - shell: msys2 {0}
       run: |
-        C:\msys64\usr\bin\pacman.exe -S --noconfirm mingw-w64-ucrt-x86_64-gcc
+        make
 
-    - name: pacman install gtk3
-      run: |
-        C:\msys64\usr\bin\pacman.exe -S --noconfirm mingw-w64-ucrt-x86_64-gtk3
-
+# TODO compile
+# package and upload
 
 #    - name: window functions
 #      run: |
