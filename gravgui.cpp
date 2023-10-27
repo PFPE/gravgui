@@ -124,6 +124,8 @@ struct tie {  // struct for holding an entire tie!
     std::vector<val_time> acounts{3}; // ship 1, land tie
     std::vector<val_time> bcounts{3}; // land 1, land tie
     std::vector<val_time> ccounts{3}; // ship 2, land tie
+    std::vector<double> mgal_averages;
+    std::vector<time_t> t_averages;
     double bias=-999;  // the thing we want to calculate in the end
     GtkWidget *bias_label;
     double avg_height=-999;
@@ -321,8 +323,8 @@ calibration read_lm_calib(const std::string& filePath) {
         }
         if (floats.size() == 3) { // read three floats from the line!
             calib.brackets.push_back(floats[0]);
-            calib.factors.push_back(floats[1]);
-            calib.offsets.push_back(floats[2]);
+            calib.factors.push_back(floats[2]);
+            calib.offsets.push_back(floats[1]);
         }
     }
     inputFile.close();
@@ -424,11 +426,14 @@ void tie_to_toml(const std::string& filepath, tie* gravtie) {
     outputFile << "meter=\"" << gravtie->lminfo.meter << "\""<< std::endl;
     outputFile << "alt_meter=\"" << gravtie->lminfo.alt_meter << "\""<< std::endl;
     outputFile << "cal_file_path=\"" << gravtie->lminfo.cal_file_path << "\""<< std::endl;
+    outputFile << "ship_lon=" << std::fixed << std::setprecision(3) << gravtie->lminfo.ship_lon << std::endl;
+    outputFile << "ship_lat=" << std::fixed << std::setprecision(3) << gravtie->lminfo.ship_lat << std::endl;
     outputFile << "land_tie_value=" << std::fixed << std::setprecision(2) << gravtie->lminfo.land_tie_value << std::endl;
     outputFile << "drift=" << std::fixed << std::setprecision(2) << gravtie->drift<< std::endl;
     // all the counts and milligals etc
     std::vector<std::vector<val_time> > allcounts{gravtie->acounts, gravtie->bcounts, gravtie->ccounts};
     char letter = 'a';
+    int itm = 0;
     for (const std::vector<val_time>& thesecounts : allcounts) {
         int num = 1;
         for (const val_time& thisone : thesecounts) {
@@ -439,9 +444,17 @@ void tie_to_toml(const std::string& filepath, tie* gravtie) {
             strftime(buffer, sizeof(buffer), "%Y-%m-%dT%H:%M:%S", timeinfo);
             outputFile << letter << num << ".t=" << buffer << "Z" << std::endl;
             outputFile << letter << num << ".m=" << std::fixed << std::setprecision(2) << thisone.m1 << std::endl;
-        num++;
+            num++;
         }
-    letter++;
+        struct tm* timeinfo;
+        timeinfo = gmtime(&gravtie->t_averages[itm]);
+        char buffer[20];
+        strftime(buffer, sizeof(buffer), "%Y-%m-%dT%H:%M:%S", timeinfo);
+        outputFile << letter << letter <<  ".t_avg=" << buffer << "Z" << std::endl;
+        outputFile << letter << letter <<  ".m_avg=" << std::fixed << std::setprecision(3) << gravtie->mgal_averages[itm] << std::endl;
+        itm++;
+
+        letter++;
     }
     outputFile << std::endl;
 
@@ -479,6 +492,9 @@ void toml_to_tie(const std::string& filePath, tie* gravtie) {
         std::cerr << "Error: Unable to open file " << filePath << std::endl;
         return;
     }
+
+    std::vector<double> mgal_a{3};
+    std::vector<time_t> tmgal_a{3};
 
     std::string line;
     while (std::getline(inputFile, line)) {
@@ -520,11 +536,16 @@ void toml_to_tie(const std::string& filePath, tie* gravtie) {
                 // key matchups for floats: stof-ing everything
                 if (key=="station_gravity") gravtie->stinfo.station_gravity = std::stof(value);
                 if (key=="land_tie_value") gravtie->lminfo.land_tie_value = std::stof(value);
+                if (key=="ship_lon") gravtie->lminfo.ship_lon = std::stof(value);
+                if (key=="ship_lat") gravtie->lminfo.ship_lat = std::stof(value);
                 if (key=="drift") gravtie->drift = std::stof(value);
                 if (key=="bias") gravtie->bias = std::stof(value);
                 if (key=="water_grav") gravtie->water_grav = std::stof(value);
                 if (key=="avg_dgs_grav") gravtie->avg_dgs_grav = std::stof(value);
                 if (key=="avg_height") gravtie->avg_height = std::stof(value);
+                if (key=="aa.m_avg") mgal_a[0] = std::stof(value);
+                if (key=="bb.m_avg") mgal_a[1] = std::stof(value);
+                if (key=="cc.m_avg") mgal_a[2] = std::stof(value);
 
                 if (key=="a1.c") gravtie->acounts[0].h1 = std::stof(value);
                 if (key=="a2.c") gravtie->acounts[1].h1 = std::stof(value);
@@ -567,12 +588,20 @@ void toml_to_tie(const std::string& filePath, tie* gravtie) {
                         if (key.substr(0,2)=="h1") gravtie->heights[0].t1 = outtime;
                         if (key.substr(0,2)=="h2") gravtie->heights[1].t1 = outtime;
                         if (key.substr(0,2)=="h3") gravtie->heights[2].t1 = outtime;
+
+                        if (key.substr(0,2)=="aa") tmgal_a[0] = outtime;
+                        if (key.substr(0,2)=="bb") tmgal_a[0] = outtime;
+                        if (key.substr(0,2)=="cc") tmgal_a[0] = outtime;
                     //}
                 }
             }
         }
     }
     inputFile.close();
+
+    gravtie->mgal_averages = mgal_a;
+    gravtie->t_averages = tmgal_a;
+
     // now, set all the gui fields and buttons appropriately based on what got read into the tie
     // ship: cb, en, save button
     if (gravtie->shinfo.ship!="") {
@@ -646,6 +675,18 @@ void toml_to_tie(const std::string& filePath, tie* gravtie) {
     }
     // land tie toggle (note that callback for buttons does NOT work here)
     if (gravtie->lminfo.landtie) gtk_switch_set_active(GTK_SWITCH(gravtie->lminfo.lts), TRUE);
+    if (gravtie->lminfo.ship_lon > 0) {
+        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->lminfo.en_lon), FALSE);
+        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->lminfo.en_lat), FALSE);
+        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->lminfo.bt_coords), FALSE);
+
+        char buff1[7];
+        snprintf(buff1, sizeof(buff1), "%.3f", gravtie->lminfo.ship_lon);
+        char buff2[7];
+        snprintf(buff2, sizeof(buff2), "%.3f", gravtie->lminfo.ship_lat);
+        gtk_entry_set_text(GTK_ENTRY(gravtie->lminfo.en_lon), buff1);
+        gtk_entry_set_text(GTK_ENTRY(gravtie->lminfo.en_lat), buff2);
+    }
     // land meter
     if (gravtie->lminfo.meter!="") {
         if (gravtie->lminfo.meter=="Other") {
@@ -749,7 +790,36 @@ void write_report(const std::string& filepath, tie* gravtie) {
     outputFile << std::endl;
     
     if (gravtie->lminfo.landtie) {
-    // TODO what goes in the land tie section? no examples given
+        outputFile << "Land meter #: " << gravtie->lminfo.meter << std::endl;
+        outputFile << "Meter temperature: " << std::endl;  // TODO TODO TODO
+        outputFile << std::endl;
+        outputFile << "#New station A:" << std::endl;
+        outputFile << "Name: " << gravtie->shinfo.ship << std::endl;
+        outputFile << "Latitude (deg): " << std::fixed << std::setprecision(3) << gravtie->lminfo.ship_lat << std::endl;
+        outputFile << "Longitude (deg): " << std::fixed << std::setprecision(3) << gravtie->lminfo.ship_lon << std::endl;
+        outputFile << "Elevation (m): " << std::endl; // TODO TODO TODO
+
+
+        for (int i=0; i<3; i++) {
+            time_t rawtime = gravtie->t_averages[i];
+            struct tm * cookedtime;
+            char buffer[30];
+            cookedtime = gmtime(&rawtime);
+            strftime(buffer, sizeof(buffer), "%Y/%m/%d %H:%M:%S", cookedtime);
+            outputFile << "UTC time and water height to pier (m) " << i+1 << ": ";
+                outputFile << buffer << " " << std::fixed << std::setprecision(3) << gravtie->mgal_averages[i] << std::endl;
+        }
+
+        double AA_timedelta = difftime(gravtie->t_averages[2], gravtie->t_averages[0]);
+        double AB_timedelta = difftime(gravtie->t_averages[1], gravtie->t_averages[0]);
+        double dc_avg_mgals_B = gravtie->mgal_averages[1] - AB_timedelta*gravtie->drift;
+
+        outputFile << "Delta_T_ab (s): " << std::fixed << std::setprecision(3) << AB_timedelta << std::endl;
+        outputFile << "Delta_T_aa (s): " << std::fixed << std::setprecision(3) << AA_timedelta << std::endl;
+        outputFile << "Drift (mGal): (" << std::fixed << std::setprecision(3) << gravtie->mgal_averages[2] << " - " << gravtie->mgal_averages[0] << ")/" << AA_timedelta << " = " << gravtie->drift << std::endl;
+        outputFile << "Drift corrected meter gravity at B (mGal): " << std::fixed << std::setprecision(3) << gravtie->mgal_averages[1] << " - " << AB_timedelta << " * " << gravtie->drift << " = " << dc_avg_mgals_B << std::endl;
+        outputFile << "Gravity at pier (mGal): " << gravtie->stinfo.station_gravity << " + " << gravtie->mgal_averages[0] << " - " << dc_avg_mgals_B << " = " << gravtie->lminfo.land_tie_value << std::endl;
+
     } else {
         outputFile << "N/A" << std::endl;
     }
@@ -1474,7 +1544,7 @@ double convert_counts_mgals (val_time c1, calibration calib) {
 
     for (int i=1; i<calib.brackets.size(); i++) {
         double diff = std::abs(c1.h1 - calib.brackets[i]);
-        if (diff < min_diff && calib.brackets[i] < c1.h1) {
+        if (diff < min_diff && calib.brackets[i] <= c1.h1) {
             cind = i;
             min_diff = diff;
         }  // TODO catch if we fall off the end of the table
@@ -1530,7 +1600,7 @@ void on_compute_landtie(GtkWidget *button, gpointer data) {
             icounts += 1;
         }
     }
-    if (icounts == 0) return;  // no a1 counts
+    if (icounts == 0) return;  // no b1 counts
     mgal_averages.push_back(mgal_sum/icounts);
     t_averages.push_back(t_sum/icounts);
 
@@ -1546,7 +1616,7 @@ void on_compute_landtie(GtkWidget *button, gpointer data) {
             icounts += 1;
         }
     }
-    if (icounts == 0) return;  // no a1 counts
+    if (icounts == 0) return;  // no a2 counts
     mgal_averages.push_back(mgal_sum/icounts);
     t_averages.push_back(t_sum/icounts);
 
@@ -1560,6 +1630,8 @@ void on_compute_landtie(GtkWidget *button, gpointer data) {
     double land_tie_value = ref_g + gdiff;
     gravtie->lminfo.land_tie_value = land_tie_value;
     gravtie->drift = drift;
+    gravtie->mgal_averages = mgal_averages;
+    gravtie->t_averages = t_averages;
 
     char buffer[40]; // Adjust size?
     snprintf(buffer, sizeof(buffer), "Land tie value: %.2f", land_tie_value);
