@@ -9,8 +9,8 @@
 #include <numeric>
 #include <algorithm>
 #include <ctime>
-#include "filt.h"       // constructs for applying FIR filter(s)
-#include "window_functions.h"   // calculate windows for filters
+#include "lib/filt.h"       // constructs for applying FIR filter(s)
+#include "lib/window_functions.h"   // calculate windows for filters
 //#include <cairo.h>  // will need later for plotting if we try to do that
 
 

@@ -8,6 +8,8 @@ CXX = g++
 CXXFLAGS = -O3 -I. -std=c++11
 xtraflags = `pkg-config --cflags --libs gtk+-3.0`
 
+# path things
+LIB = lib
 
 # mains
 all: gravgui
@@ -18,11 +20,11 @@ gravgui: $(filters) gravgui.cpp
 	$(CXX) $(CXXFLAGS) $(filters) gravgui.cpp -lm $(xtraflags) -o gravgui
 
 # objects
-filt.o: filt.cpp
-	$(CXX) $(CXXFLAGS) -c filt.cpp
+filt.o: $(LIB)/filt.cpp
+	$(CXX) $(CXXFLAGS) -c $(LIB)/filt.cpp
 
-window_functions.o: window_functions.c
-	$(CC) $(CCFLAGS) -c window_functions.c
+window_functions.o: $(LIB)/window_functions.c
+	$(CC) $(CCFLAGS) -c $(LIB)/window_functions.c
 
 # clean
 
