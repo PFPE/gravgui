@@ -13,9 +13,9 @@ jobs:
       with:
         msystem: UCRT64
         install: >-
-            mingw-w64-ucrt-x86_86-gcc
-            mingw-w64-ucrt-x86_86-gtk3
-            mingw-w64-ucrt-x86_86-pkg-config
+            mingw-w64-ucrt-x86_64-gcc
+            mingw-w64-ucrt-x86_64-gtk3
+            mingw-w64-ucrt-x86_64-pkg-config
             make
 
     - name: Checkout repository
