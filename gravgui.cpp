@@ -94,6 +94,8 @@ struct lm_info { // name, brackets, factors, offsets for calibration of landmete
     std::string cal_file_path="";
     float ship_lon = -999;
     float ship_lat = -999;
+    float ship_elev = -999;
+    float meter_temp = -999;
     bool landtie = FALSE;
     double land_tie_value = -999; // used instead of station_gravity if landtie
     std::map<std::string, std::map<std::string, std::string> > landmeter_db; // names+paths
@@ -108,6 +110,8 @@ struct lm_info { // name, brackets, factors, offsets for calibration of landmete
     GtkWidget *lt_label; // label for calculated land tie val
     GtkWidget *en_lon;
     GtkWidget *en_lat;
+    GtkWidget *en_elev;
+    GtkWidget *en_temp;
     GtkWidget *bt_coords;
     GtkWidget *br_coords;
 };
@@ -428,6 +432,8 @@ void tie_to_toml(const std::string& filepath, tie* gravtie) {
     outputFile << "cal_file_path=\"" << gravtie->lminfo.cal_file_path << "\""<< std::endl;
     outputFile << "ship_lon=" << std::fixed << std::setprecision(3) << gravtie->lminfo.ship_lon << std::endl;
     outputFile << "ship_lat=" << std::fixed << std::setprecision(3) << gravtie->lminfo.ship_lat << std::endl;
+    outputFile << "ship_elev=" << std::fixed << std::setprecision(3) << gravtie->lminfo.ship_elev << std::endl;
+    outputFile << "meter_temp=" << std::fixed << std::setprecision(3) << gravtie->lminfo.meter_temp << std::endl;
     outputFile << "land_tie_value=" << std::fixed << std::setprecision(2) << gravtie->lminfo.land_tie_value << std::endl;
     outputFile << "drift=" << std::fixed << std::setprecision(2) << gravtie->drift<< std::endl;
     // all the counts and milligals etc
@@ -538,6 +544,8 @@ void toml_to_tie(const std::string& filePath, tie* gravtie) {
                 if (key=="land_tie_value") gravtie->lminfo.land_tie_value = std::stof(value);
                 if (key=="ship_lon") gravtie->lminfo.ship_lon = std::stof(value);
                 if (key=="ship_lat") gravtie->lminfo.ship_lat = std::stof(value);
+                if (key=="ship_elev") gravtie->lminfo.ship_elev = std::stof(value);
+                if (key=="meter_temp") gravtie->lminfo.meter_temp = std::stof(value);
                 if (key=="drift") gravtie->drift = std::stof(value);
                 if (key=="bias") gravtie->bias = std::stof(value);
                 if (key=="water_grav") gravtie->water_grav = std::stof(value);
@@ -688,14 +696,22 @@ void toml_to_tie(const std::string& filePath, tie* gravtie) {
     if (gravtie->lminfo.ship_lon > 0) {
         gtk_widget_set_sensitive(GTK_WIDGET(gravtie->lminfo.en_lon), FALSE);
         gtk_widget_set_sensitive(GTK_WIDGET(gravtie->lminfo.en_lat), FALSE);
+        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->lminfo.en_elev), FALSE);
+        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->lminfo.en_temp), FALSE);
         gtk_widget_set_sensitive(GTK_WIDGET(gravtie->lminfo.bt_coords), FALSE);
 
         char buff1[7];
         snprintf(buff1, sizeof(buff1), "%.3f", gravtie->lminfo.ship_lon);
         char buff2[7];
         snprintf(buff2, sizeof(buff2), "%.3f", gravtie->lminfo.ship_lat);
+        char buff3[7];
+        snprintf(buff3, sizeof(buff3), "%.3f", gravtie->lminfo.ship_elev);
+        char buff4[7];
+        snprintf(buff4, sizeof(buff4), "%.3f", gravtie->lminfo.meter_temp);
         gtk_entry_set_text(GTK_ENTRY(gravtie->lminfo.en_lon), buff1);
         gtk_entry_set_text(GTK_ENTRY(gravtie->lminfo.en_lat), buff2);
+        gtk_entry_set_text(GTK_ENTRY(gravtie->lminfo.en_elev), buff3);
+        gtk_entry_set_text(GTK_ENTRY(gravtie->lminfo.en_temp), buff4);
     }
     // land meter
     if (gravtie->lminfo.meter!="") {
@@ -1253,21 +1269,35 @@ void on_lm_coordsave_button(GtkWidget *widget, gpointer data) {
     lm_info* lminfo = static_cast<lm_info*>(data);
     const gchar *lonlon = gtk_entry_get_text(GTK_ENTRY(lminfo->en_lon));
     const gchar *latlat = gtk_entry_get_text(GTK_ENTRY(lminfo->en_lat));
-    if (lonlon != NULL && lonlon[0] != '\0' && latlat != NULL && latlat[0] != '\0') {
+    const gchar *eleva = gtk_entry_get_text(GTK_ENTRY(lminfo->en_elev));
+    const gchar *temper = gtk_entry_get_text(GTK_ENTRY(lminfo->en_temp));
+    if (lonlon != NULL && lonlon[0] != '\0' && latlat != NULL && latlat[0] != '\0' && eleva != NULL && temper != NULL) {
         float nlon = atof(lonlon);
         float nlat = atof(latlat);
+        float nele = atof(eleva);
+        float ntem = atof(temper);
         lminfo->ship_lon = nlon;
         lminfo->ship_lat = nlat;
+        lminfo->ship_elev = nele;
+        lminfo->meter_temp = ntem;
 
         char buff1[7];
         snprintf(buff1, sizeof(buff1), "%.3f", nlon);
         char buff2[7];
         snprintf(buff2, sizeof(buff2), "%.3f", nlat);
+        char buff3[7];
+        snprintf(buff3, sizeof(buff3), "%.3f", nele);
+        char buff4[7];
+        snprintf(buff4, sizeof(buff4), "%.3f", ntem);
         gtk_entry_set_text(GTK_ENTRY(lminfo->en_lon), buff1);
         gtk_entry_set_text(GTK_ENTRY(lminfo->en_lat), buff2);
+        gtk_entry_set_text(GTK_ENTRY(lminfo->en_elev), buff3);
+        gtk_entry_set_text(GTK_ENTRY(lminfo->en_temp), buff4);
 
         gtk_widget_set_sensitive(GTK_WIDGET(lminfo->en_lon), FALSE);
         gtk_widget_set_sensitive(GTK_WIDGET(lminfo->en_lat), FALSE);
+        gtk_widget_set_sensitive(GTK_WIDGET(lminfo->en_elev), FALSE);
+        gtk_widget_set_sensitive(GTK_WIDGET(lminfo->en_temp), FALSE);
         gtk_widget_set_sensitive(GTK_WIDGET(lminfo->bt_coords), FALSE);
     }
 }
@@ -1277,10 +1307,16 @@ void on_lm_coordreset_button(GtkWidget *widget, gpointer data) {
     lm_info* lminfo = static_cast<lm_info*>(data);
     lminfo->ship_lon = -999;
     lminfo->ship_lat = -999;
+    lminfo->ship_elev = -999;
+    lminfo->meter_temp = -999;
     gtk_entry_set_text(GTK_ENTRY(lminfo->en_lon), "");
     gtk_entry_set_text(GTK_ENTRY(lminfo->en_lat), "");
+    gtk_entry_set_text(GTK_ENTRY(lminfo->en_elev), "");
+    gtk_entry_set_text(GTK_ENTRY(lminfo->en_temp), "");
     gtk_widget_set_sensitive(GTK_WIDGET(lminfo->en_lon), TRUE);
     gtk_widget_set_sensitive(GTK_WIDGET(lminfo->en_lat), TRUE);
+    gtk_widget_set_sensitive(GTK_WIDGET(lminfo->en_elev), TRUE);
+    gtk_widget_set_sensitive(GTK_WIDGET(lminfo->en_temp), TRUE);
     gtk_widget_set_sensitive(GTK_WIDGET(lminfo->bt_coords), TRUE);
 }
 
@@ -1661,6 +1697,8 @@ static void landtie_switch_callback(GtkSwitch *switch_widget, gboolean state, gp
         if (gravtie->lminfo.ship_lon < 0) {
             gtk_widget_set_sensitive(GTK_WIDGET(gravtie->lminfo.en_lon), TRUE);
             gtk_widget_set_sensitive(GTK_WIDGET(gravtie->lminfo.en_lat), TRUE);
+            gtk_widget_set_sensitive(GTK_WIDGET(gravtie->lminfo.en_elev), TRUE);
+            gtk_widget_set_sensitive(GTK_WIDGET(gravtie->lminfo.en_temp), TRUE);
             gtk_widget_set_sensitive(GTK_WIDGET(gravtie->lminfo.bt_coords), TRUE);
         }
         gtk_widget_set_sensitive(GTK_WIDGET(gravtie->lminfo.br_coords), TRUE);
@@ -1687,6 +1725,8 @@ static void landtie_switch_callback(GtkSwitch *switch_widget, gboolean state, gp
 
         gtk_widget_set_sensitive(GTK_WIDGET(gravtie->lminfo.en_lon), FALSE);
         gtk_widget_set_sensitive(GTK_WIDGET(gravtie->lminfo.en_lat), FALSE);
+        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->lminfo.en_elev), FALSE);
+        gtk_widget_set_sensitive(GTK_WIDGET(gravtie->lminfo.en_temp), FALSE);
         gtk_widget_set_sensitive(GTK_WIDGET(gravtie->lminfo.bt_coords), FALSE);
         gtk_widget_set_sensitive(GTK_WIDGET(gravtie->lminfo.br_coords), FALSE);
 
@@ -2262,21 +2302,31 @@ int main(int argc, char *argv[]) {
     gtk_grid_attach(GTK_GRID(grid), landtie_switch, 1, 3, 1, 1);
 
     GtkWidget *lt_lon = gtk_entry_new();
-    gtk_entry_set_placeholder_text(GTK_ENTRY(lt_lon), "Ship longitude");
+    gtk_entry_set_placeholder_text(GTK_ENTRY(lt_lon), "Ship lon (deg)");
     GtkWidget *lt_lat = gtk_entry_new();
-    gtk_entry_set_placeholder_text(GTK_ENTRY(lt_lat), "Ship latitude");
+    gtk_entry_set_placeholder_text(GTK_ENTRY(lt_lat), "Ship lat (deg)");
+    GtkWidget *lt_elev = gtk_entry_new();
+    gtk_entry_set_placeholder_text(GTK_ENTRY(lt_elev), "Elevation (m)");
+    GtkWidget *lt_temp = gtk_entry_new();
+    gtk_entry_set_placeholder_text(GTK_ENTRY(lt_temp), "Temperature (C)");
     gtk_grid_attach(GTK_GRID(grid), lt_lon, 2, 3, 2, 1);
     gtk_grid_attach(GTK_GRID(grid), lt_lat, 4, 3, 2, 1);
+    gtk_grid_attach(GTK_GRID(grid), lt_elev, 6, 3, 2, 1);
+    gtk_grid_attach(GTK_GRID(grid), lt_temp, 8, 3, 2, 1);
     gtk_widget_set_sensitive(GTK_WIDGET(lt_lon), FALSE);
     gtk_widget_set_sensitive(GTK_WIDGET(lt_lat), FALSE);
-    GtkWidget *b_lt_coords = gtk_button_new_with_label("save coords");
-    gtk_grid_attach(GTK_GRID(grid), b_lt_coords, 6, 3, 1, 1);
+    gtk_widget_set_sensitive(GTK_WIDGET(lt_elev), FALSE);
+    gtk_widget_set_sensitive(GTK_WIDGET(lt_temp), FALSE);
+    GtkWidget *b_lt_coords = gtk_button_new_with_label("save");
+    gtk_grid_attach(GTK_GRID(grid), b_lt_coords, 10, 3, 1, 1);
     gtk_widget_set_sensitive(GTK_WIDGET(b_lt_coords), FALSE);
-    GtkWidget *br_coords = gtk_button_new_with_label("reset coords");
-    gtk_grid_attach(GTK_GRID(grid), br_coords, 7, 3, 1, 1);
+    GtkWidget *br_coords = gtk_button_new_with_label("reset");
+    gtk_grid_attach(GTK_GRID(grid), br_coords, 11, 3, 1, 1);
     gtk_widget_set_sensitive(GTK_WIDGET(br_coords), FALSE);
     gravtie.lminfo.en_lon = lt_lon;
     gravtie.lminfo.en_lat = lt_lat;
+    gravtie.lminfo.en_elev = lt_elev;
+    gravtie.lminfo.en_temp = lt_temp;
     gravtie.lminfo.bt_coords = b_lt_coords;
     gravtie.lminfo.br_coords = br_coords;
     g_signal_connect(b_lt_coords, "clicked", G_CALLBACK(on_lm_coordsave_button), &gravtie.lminfo);

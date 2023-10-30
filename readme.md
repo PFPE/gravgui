@@ -18,7 +18,6 @@ The file `example.toml` shows the format of a tie that has been written out from
 
 ## TODO
 docs and docs action for build\
-land meter temperature, ship elevation\
 releases (with chmod) instead of actions page archives\
 mac test exec - gtk and xquartz? fancier things?\
 modularity/header files
