@@ -1853,12 +1853,12 @@ int main(int argc, char *argv[]) {
     // Create the main window
     GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_title(GTK_WINDOW(window), "gravgui v1.0");
-    gtk_window_set_default_size(GTK_WINDOW(window), 600, 600);
+    gtk_window_set_default_size(GTK_WINDOW(window), 800, 600);
     gtk_container_set_border_width(GTK_CONTAINER(window), 10);
 
     // Create a grid and put it in the window
     GtkWidget *grid = gtk_grid_new();
-    gtk_grid_set_column_homogeneous(GTK_GRID(grid), gboolean FALSE);
+    gtk_grid_set_column_homogeneous(GTK_GRID(grid), gboolean TRUE);
     gtk_grid_set_row_homogeneous(GTK_GRID(grid), gboolean TRUE);
     gtk_container_add(GTK_CONTAINER(window), grid);
 
@@ -1925,11 +1925,11 @@ int main(int argc, char *argv[]) {
     // box & buttons for entering name if ship is "other"
     GtkWidget *e_othership = gtk_entry_new();  // other ship
     gtk_grid_attach(GTK_GRID(grid), e_othership, 4, 0, 2, 1);
-    gtk_entry_set_placeholder_text(GTK_ENTRY(e_othership),"If 'other', enter ship name here");
-    GtkWidget *b_saveship = gtk_button_new_with_label("Save ship");
+    gtk_entry_set_placeholder_text(GTK_ENTRY(e_othership),"Ship name");
+    GtkWidget *b_saveship = gtk_button_new_with_label("Save");
     g_signal_connect(b_saveship, "clicked", G_CALLBACK(on_ship_save), &gravtie.shinfo);
     gtk_grid_attach(GTK_GRID(grid), b_saveship, 6, 0, 1, 1);
-    GtkWidget *b_resetship = gtk_button_new_with_label("Reset ship");
+    GtkWidget *b_resetship = gtk_button_new_with_label("Reset");
     g_signal_connect(b_resetship, "clicked", G_CALLBACK(on_ship_reset), &gravtie.shinfo);
     gtk_grid_attach(GTK_GRID(grid), b_resetship, 7, 0, 1, 1);
 
@@ -1983,25 +1983,25 @@ int main(int argc, char *argv[]) {
 
     // box & button for when station is "other"
     GtkWidget *e_othersta = gtk_entry_new();  // other station
-    gtk_entry_set_placeholder_text(GTK_ENTRY(e_othersta),"If 'other', enter station name here");
+    gtk_entry_set_placeholder_text(GTK_ENTRY(e_othersta),"Station name");
     gtk_grid_attach(GTK_GRID(grid), e_othersta, 4, 1, 2, 1);
-    GtkWidget *b_savesta = gtk_button_new_with_label("Save station");
+    GtkWidget *b_savesta = gtk_button_new_with_label("Save");
     g_signal_connect(b_savesta, "clicked", G_CALLBACK(on_sta_save), &gravtie.stinfo);
     gtk_grid_attach(GTK_GRID(grid), b_savesta, 6, 1, 1, 1);
-    GtkWidget *b_resetsta = gtk_button_new_with_label("Reset station");
+    GtkWidget *b_resetsta = gtk_button_new_with_label("Reset");
     g_signal_connect(b_resetsta, "clicked", G_CALLBACK(on_sta_reset), &gravtie.stinfo);
     gtk_grid_attach(GTK_GRID(grid), b_resetsta, 7, 1, 1, 1);
 
     // box and button for absolute gravity when we need it
     GtkWidget *e_absgrav = gtk_entry_new();  // other station
-    gtk_entry_set_placeholder_text(GTK_ENTRY(e_absgrav),"enter absolute gravity");
+    gtk_entry_set_placeholder_text(GTK_ENTRY(e_absgrav),"Absolute gravity");
     gtk_widget_set_sensitive(GTK_WIDGET(e_absgrav), FALSE);
     gtk_grid_attach(GTK_GRID(grid), e_absgrav, 8, 1, 2, 1);
-    GtkWidget *b_savegrav = gtk_button_new_with_label("Save grav");
+    GtkWidget *b_savegrav = gtk_button_new_with_label("Save");
     gtk_widget_set_sensitive(GTK_WIDGET(b_savegrav), FALSE);
     g_signal_connect(b_savegrav, "clicked", G_CALLBACK(on_grav_save), &gravtie.stinfo);
     gtk_grid_attach(GTK_GRID(grid), b_savegrav, 10, 1, 1, 1);
-    GtkWidget *b_resetgrav = gtk_button_new_with_label("Reset grav");
+    GtkWidget *b_resetgrav = gtk_button_new_with_label("Reset");
     g_signal_connect(b_resetgrav, "clicked", G_CALLBACK(on_grav_reset), &gravtie.stinfo);
     gtk_grid_attach(GTK_GRID(grid), b_resetgrav, 11, 1, 1, 1);
     gtk_widget_set_sensitive(GTK_WIDGET(b_resetgrav), FALSE);
@@ -2058,21 +2058,21 @@ int main(int argc, char *argv[]) {
 
     // box & button for when meter is "other"
     GtkWidget *e_otherlm = gtk_entry_new();  // other station
-    gtk_entry_set_placeholder_text(GTK_ENTRY(e_otherlm),"If 'other', enter meter name here");
+    gtk_entry_set_placeholder_text(GTK_ENTRY(e_otherlm),"Meter name");
     gtk_grid_attach(GTK_GRID(grid), e_otherlm, 4, 4, 2, 1);
-    GtkWidget *b_savelm = gtk_button_new_with_label("Save meter");
+    GtkWidget *b_savelm = gtk_button_new_with_label("Save");
     g_signal_connect(b_savelm, "clicked", G_CALLBACK(on_lm_save), &gravtie.lminfo);
     gtk_grid_attach(GTK_GRID(grid), b_savelm, 6, 4, 1, 1);
-    GtkWidget *b_resetlm = gtk_button_new_with_label("Reset meter");
+    GtkWidget *b_resetlm = gtk_button_new_with_label("Reset");
     g_signal_connect(b_resetlm, "clicked", G_CALLBACK(on_lm_reset), &gravtie.lminfo);
     gtk_grid_attach(GTK_GRID(grid), b_resetlm, 7, 4, 1, 1);
     GtkWidget *b_lmcalfile = gtk_button_new_with_label("Other cal. file");
-    gtk_grid_attach(GTK_GRID(grid), b_lmcalfile, 8, 4, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), b_lmcalfile, 8, 4, 2, 1);
     g_signal_connect(b_lmcalfile, "clicked", G_CALLBACK(on_lm_filebrowse_clicked), &gravtie.lminfo);
     GtkWidget *cal_label = gtk_label_new("0 calibration lines read");
     gtk_label_set_line_wrap(GTK_LABEL(cal_label), TRUE);
     gtk_label_set_xalign(GTK_LABEL(cal_label), 0.0);
-    gtk_grid_attach(GTK_GRID(grid), cal_label, 9, 4, 2, 1);
+    gtk_grid_attach(GTK_GRID(grid), cal_label, 10, 4, 2, 1);
     gravtie.lminfo.cal_label = cal_label;
 
     gravtie.lminfo.en1 = e_otherlm;
@@ -2089,10 +2089,10 @@ int main(int argc, char *argv[]) {
     // PERSONNEL ENTRY /////////////////////////////////////////////////////////
     GtkWidget *e_pers = gtk_entry_new();  // personnel
     gtk_grid_attach(GTK_GRID(grid), e_pers, 1, 2, 3, 1);
-    GtkWidget *b_persave = gtk_button_new_with_label("Save pers.");
+    GtkWidget *b_persave = gtk_button_new_with_label("Save");
     gtk_grid_attach(GTK_GRID(grid), b_persave, 4, 2, 1, 1);
     g_signal_connect(b_persave, "clicked", G_CALLBACK(on_pers_save), &gravtie.prinfo);
-    GtkWidget *b_perreset = gtk_button_new_with_label("Reset pers.");
+    GtkWidget *b_perreset = gtk_button_new_with_label("Reset");
     gtk_grid_attach(GTK_GRID(grid), b_perreset, 5, 2, 1, 1);
     g_signal_connect(b_perreset, "clicked", G_CALLBACK(on_pers_reset), &gravtie.prinfo);
     gravtie.prinfo.en1 = e_pers;
@@ -2122,15 +2122,15 @@ int main(int argc, char *argv[]) {
     gravtie.heights[2].en1 = e_h3;
 
     // buttons
-    GtkWidget *b_h1 = gtk_button_new_with_label("save h1");
-    GtkWidget *b_h2 = gtk_button_new_with_label("save h2");
-    GtkWidget *b_h3 = gtk_button_new_with_label("save h3");
+    GtkWidget *b_h1 = gtk_button_new_with_label("save");
+    GtkWidget *b_h2 = gtk_button_new_with_label("save");
+    GtkWidget *b_h3 = gtk_button_new_with_label("save");
     gtk_grid_attach(GTK_GRID(grid), b_h1, 6, 5, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), b_h2, 6, 6, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), b_h3, 6, 7, 1, 1);
-    GtkWidget *b_rh1 = gtk_button_new_with_label("reset h1");
-    GtkWidget *b_rh2 = gtk_button_new_with_label("reset h2");
-    GtkWidget *b_rh3 = gtk_button_new_with_label("reset h3");
+    GtkWidget *b_rh1 = gtk_button_new_with_label("reset");
+    GtkWidget *b_rh2 = gtk_button_new_with_label("reset");
+    GtkWidget *b_rh3 = gtk_button_new_with_label("reset");
     gtk_grid_attach(GTK_GRID(grid), b_rh1, 7, 5, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), b_rh2, 7, 6, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), b_rh3, 7, 7, 1, 1);
@@ -2198,15 +2198,15 @@ int main(int argc, char *argv[]) {
     gravtie.ccounts[2].en1 = e_c3;
 
     // buttons
-    GtkWidget *b_a1 = gtk_button_new_with_label("save a1");
-    GtkWidget *b_a2 = gtk_button_new_with_label("save a2");
-    GtkWidget *b_a3 = gtk_button_new_with_label("save a3");
-    GtkWidget *b_b1 = gtk_button_new_with_label("save b1");
-    GtkWidget *b_b2 = gtk_button_new_with_label("save b2");
-    GtkWidget *b_b3 = gtk_button_new_with_label("save b3");
-    GtkWidget *b_c1 = gtk_button_new_with_label("save c1");
-    GtkWidget *b_c2 = gtk_button_new_with_label("save c2");
-    GtkWidget *b_c3 = gtk_button_new_with_label("save c3");
+    GtkWidget *b_a1 = gtk_button_new_with_label("save");
+    GtkWidget *b_a2 = gtk_button_new_with_label("save");
+    GtkWidget *b_a3 = gtk_button_new_with_label("save");
+    GtkWidget *b_b1 = gtk_button_new_with_label("save");
+    GtkWidget *b_b2 = gtk_button_new_with_label("save");
+    GtkWidget *b_b3 = gtk_button_new_with_label("save");
+    GtkWidget *b_c1 = gtk_button_new_with_label("save");
+    GtkWidget *b_c2 = gtk_button_new_with_label("save");
+    GtkWidget *b_c3 = gtk_button_new_with_label("save");
     gtk_grid_attach(GTK_GRID(grid), b_a1, 2, 5, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), b_a2, 2, 6, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), b_a3, 2, 7, 1, 1);
@@ -2216,15 +2216,15 @@ int main(int argc, char *argv[]) {
     gtk_grid_attach(GTK_GRID(grid), b_c1, 2, 11, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), b_c2, 2, 12, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), b_c3, 2, 13, 1, 1);
-    GtkWidget *b_ra1 = gtk_button_new_with_label("reset a1");
-    GtkWidget *b_ra2 = gtk_button_new_with_label("reset a2");
-    GtkWidget *b_ra3 = gtk_button_new_with_label("reset a3");
-    GtkWidget *b_rb1 = gtk_button_new_with_label("reset b1");
-    GtkWidget *b_rb2 = gtk_button_new_with_label("reset b2");
-    GtkWidget *b_rb3 = gtk_button_new_with_label("reset b3");
-    GtkWidget *b_rc1 = gtk_button_new_with_label("reset c1");
-    GtkWidget *b_rc2 = gtk_button_new_with_label("reset c2");
-    GtkWidget *b_rc3 = gtk_button_new_with_label("reset c3");
+    GtkWidget *b_ra1 = gtk_button_new_with_label("reset");
+    GtkWidget *b_ra2 = gtk_button_new_with_label("reset");
+    GtkWidget *b_ra3 = gtk_button_new_with_label("reset");
+    GtkWidget *b_rb1 = gtk_button_new_with_label("reset");
+    GtkWidget *b_rb2 = gtk_button_new_with_label("reset");
+    GtkWidget *b_rb3 = gtk_button_new_with_label("reset");
+    GtkWidget *b_rc1 = gtk_button_new_with_label("reset");
+    GtkWidget *b_rc2 = gtk_button_new_with_label("reset");
+    GtkWidget *b_rc3 = gtk_button_new_with_label("reset");
     gtk_grid_attach(GTK_GRID(grid), b_ra1, 3, 5, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), b_ra2, 3, 6, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), b_ra3, 3, 7, 1, 1);
