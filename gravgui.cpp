@@ -82,13 +82,13 @@ struct pers_info { // struct for personnel name, entry, buttons
     GtkWidget *bt2;  // reset button
 };
 
-struct calibration {
+struct calibration { // calibration for a land meter
     std::vector<float> brackets;
+    std::vector<float> mgvals;
     std::vector<float> factors;
-    std::vector<float> offsets;
 };
 
-struct lm_info { // name, brackets, factors, offsets for calibration of landmeter counts to mgals
+struct lm_info { // all things land-tie
     std::string meter="";
     std::string alt_meter="";
     std::string cal_file_path="";
@@ -327,8 +327,8 @@ calibration read_lm_calib(const std::string& filePath) {
         }
         if (floats.size() == 3) { // read three floats from the line!
             calib.brackets.push_back(floats[0]);
+            calib.mgvals.push_back(floats[1]);
             calib.factors.push_back(floats[2]);
-            calib.offsets.push_back(floats[1]);
         }
     }
     inputFile.close();
@@ -1189,7 +1189,7 @@ void on_lm_save(GtkWidget *widget, gpointer data) {
                         } else {
                             lminfo->cal_file_path = meter.second.at("TABLE");
                             lminfo->calib = read_lm_calib("database/land-cal/"+meter.second.at("TABLE"));
-                            //std::cout << lminfo->calib.offsets[0] << std::endl;
+                            //std::cout << lminfo->calib.mgvals[0] << std::endl;
                             char* buffer = new char[lminfo->cal_file_path.length() + 1];
                             strcpy(buffer, lminfo->cal_file_path.c_str());
                         }
@@ -1220,7 +1220,7 @@ void on_lm_reset(GtkWidget *widget, gpointer data) {
     lminfo->cal_file_path = "";
     lminfo->calib.brackets.clear();
     lminfo->calib.factors.clear();
-    lminfo->calib.offsets.clear();
+    lminfo->calib.mgvals.clear();
     // reset buttons to on and off as needed
     gtk_widget_set_sensitive(GTK_WIDGET(lminfo->bt1), TRUE);
     gtk_widget_set_sensitive(GTK_WIDGET(lminfo->bt_cal_file), FALSE);
@@ -1249,10 +1249,10 @@ static void on_lm_filebrowse_clicked(GtkWidget *button, gpointer data) {
         // push back into the external calib, overwriting
         lminfo->calib.brackets.clear();
         lminfo->calib.factors.clear();
-        lminfo->calib.offsets.clear();
+        lminfo->calib.mgvals.clear();
         lminfo->calib.brackets = calib2.brackets;
         lminfo->calib.factors = calib2.factors;
-        lminfo->calib.offsets = calib2.offsets;
+        lminfo->calib.mgvals = calib2.mgvals;
 
         lminfo->cal_file_path = sf;
     }
@@ -1600,7 +1600,7 @@ double convert_counts_mgals (val_time c1, calibration calib) {
         }  // TODO catch if we fall off the end of the table
     }
     double residual_reading = c1.h1 - calib.brackets[cind];  // subtract bracket from counts
-    mgals = residual_reading*calib.factors[cind] + calib.offsets[cind]; // calibrate to mgals!
+    mgals = residual_reading*calib.factors[cind] + calib.mgvals[cind]; // calibrate to mgals!
     return mgals;
 }
 
