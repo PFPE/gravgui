@@ -1818,7 +1818,7 @@ int main(int argc, char *argv[]) {
 
     // Create a grid and put it in the window
     GtkWidget *grid = gtk_grid_new();
-    gtk_grid_set_column_homogeneous(GTK_GRID(grid), gboolean TRUE);
+    gtk_grid_set_column_homogeneous(GTK_GRID(grid), gboolean FALSE);
     gtk_grid_set_row_homogeneous(GTK_GRID(grid), gboolean TRUE);
     gtk_container_add(GTK_CONTAINER(window), grid);
 
@@ -2032,7 +2032,7 @@ int main(int argc, char *argv[]) {
     GtkWidget *cal_label = gtk_label_new("0 calibration lines read");
     gtk_label_set_line_wrap(GTK_LABEL(cal_label), TRUE);
     gtk_label_set_xalign(GTK_LABEL(cal_label), 0.0);
-    gtk_grid_attach(GTK_GRID(grid), cal_label, 9, 4, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), cal_label, 9, 4, 2, 1);
     gravtie.lminfo.cal_label = cal_label;
 
     gravtie.lminfo.en1 = e_otherlm;
@@ -2286,7 +2286,7 @@ int main(int argc, char *argv[]) {
     gtk_label_set_xalign(GTK_LABEL(ltval_label), 0.0);  // right-justify the text
     gtk_label_set_line_wrap(GTK_LABEL(ltval_label), TRUE);
     gravtie.lminfo.lt_label = ltval_label;
-    gtk_grid_attach(GTK_GRID(grid), ltval_label, 2, 14, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), ltval_label, 2, 14, 2, 1);
 
     // IMPERIAL/METRIC TOGGLE SWITCH TODO //////////////////////////////
 
