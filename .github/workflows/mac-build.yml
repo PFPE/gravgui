@@ -15,17 +15,17 @@ jobs:
       run: |
           brew install gtk+3
 
-    - name: window functions
+    - name: install make
       run: |
-        /usr/bin/gcc -I. -c window_functions.c
+          brew install make
 
-    - name: filter windows
+    - name: install gcc?
       run: |
-        /usr/bin/g++ -O3 -I. -std=c++11 -c filt.cpp
+          brew install gcc
 
-    - name: make gravgui
+    - name: make things
       run: |
-        /usr/bin/g++ -O3 -I. -std=c++11 gravgui.cpp filt.o window_functions.o -lm $(pkg-config --cflags --libs gtk+-3.0) -o gravgui
+          make
 
     - name: package stuff
       run: |
