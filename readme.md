@@ -19,11 +19,11 @@ The file `example.toml` shows the format of a tie that has been written out from
 ## TODO
 docs and docs action for build\
 releases (with chmod) instead of actions page archives\
-mac test exec - gtk and xquartz? fancier things?\
-modularity/header files
+mac test exec - gtk and xquartz? fancier things?
 
 ### would be nice someday
 clean up filter + window function libraries\
+somehow the whole thing seems like too many lines of code\
 grav plotting? with filtering outside of bias calc?\
 metric/imperial switch?\
 raw data read (vs laptop)\
