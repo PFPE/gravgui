@@ -1,11 +1,11 @@
 # Gravity tie GUI for PFPE
-This repository contains software for computing gravity ties. The primary way to do this is with a GUI written in C++/GTK, which enables users to enter timestamped measurements of water height at the pier, upload a meter gravity file, and compute bias relative to known station gravity. Land ties can also be computed given calibration files for the meter being used.
+This repository contains software for computing gravity ties. The primary way to do this is with a GUI written in C++/GTK, which enables users to enter timestamped measurements of water height at the pier, upload a gravimeter data file, and compute bias relative to known station gravity. Land ties can also be computed given calibration files for the meter being used.
 
 ## Installation instructions
 ### C++ executable
-Pre-compiled binaries for Windows, MacOS, and Ubuntu Linux are *not yet* available but they will be, once I figure out github actions. They will still need to be run within a terminal, but fear not, that's easy!
+Pre-compiled binaries for Windows, MacOS, and Ubuntu Linux are available on the Releases page for this repository. They will need to be run within a terminal, but fear not, that's easy! Ubuntu and windows programs have been tested (for windows, use MSYS2 UCRT64 terminal and install gtk dependencies with pacman). The mac version has not been tested bc I do not have a mac.
 
-In the meantime, everything can be compiled on your local machine using gcc/g++ provided you have the requisite gtk3 libraries installed. There is a makefile provided that you can use if you have `make` installed (and also `pkg-config`).
+The GUI can also be compiled on your local machine using gcc/g++ provided you have the requisite gtk3 libraries installed. There is a makefile provided that you can use if you have `make` installed (and also `pkg-config`).
 
 If you're starting with a fresh install of ubuntu 22.04, you will need to install libgtk-3-dev at minimum (probably also make, maybe also gcc and g++).
 
