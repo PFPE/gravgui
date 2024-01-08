@@ -1,0 +1,32 @@
+name: Build documentation tex file
+
+on: [workflow_dispatch]
+
+jobs:
+  build_latex:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+
+      - name: compile LaTeX document
+        uses: xu-cheng/latex-action@v3
+        with:
+          root_file: docs/main.tex
+          working_directory: docs/
+          latexmk_use_lualatex: true:
+
+#      - name: upload compiled pdf
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: 
+
+      - name: upload pdf to repo
+        run: |
+          git config --global user.name "Hannah Mark"
+          git config --global user.email "hmark@whoi.edu"
+          git add main.pdf
+          git commit -m "update documentation"
+          git push
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
