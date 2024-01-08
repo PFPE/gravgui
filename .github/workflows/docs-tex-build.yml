@@ -10,11 +10,11 @@ jobs:
       - name: checkout repository
         uses: actions/checkout@v4
 
-  - name: Explain why this job ran
-    uses: octo-org/action-name@main
-    with:
-      entrypoint: /bin/echo
-      args: The ${{ github.event_name }} event triggered this step.
+      - name: Explain why this job ran
+        uses: octo-org/action-name@main
+        with:
+          entrypoint: /bin/echo
+          args: The ${{ github.event_name }} event triggered this step.
 
 #      - name: compile LaTeX document
 #        uses: xu-cheng/latex-action@v3
