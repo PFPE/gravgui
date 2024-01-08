@@ -15,7 +15,7 @@ jobs:
         with:
           root_file: docs/main.tex
           working_directory: docs/
-          latexmk_use_lualatex: true:
+          latexmk_use_lualatex: true
 
 #      - name: upload compiled pdf
 #        uses: actions/upload-artifact@v3
