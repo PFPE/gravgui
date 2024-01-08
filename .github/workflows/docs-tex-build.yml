@@ -13,7 +13,7 @@ jobs:
       - name: compile LaTeX document
         uses: xu-cheng/latex-action@v3
         with:
-          root_file: docs/main.tex
+          root_file: main.tex
           working_directory: docs/
           latexmk_use_lualatex: true
 
