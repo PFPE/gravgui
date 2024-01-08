@@ -29,7 +29,8 @@ jobs:
       - name: upload pdf to repo
         run: |
           git config --global user.name "Hannah Mark"
-          git config --global user.email "hmark@whoi.edu"
+          git config --global user.email "hfmark@users.noreply.github.com"
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY
           git add docs/main.pdf
           git commit -m "update documentation"
           git push
