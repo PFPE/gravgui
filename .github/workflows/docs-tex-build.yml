@@ -21,17 +21,9 @@ jobs:
           working_directory: docs/
           latexmk_use_lualatex: true
 
-#      - name: upload compiled pdf
-#        uses: actions/upload-artifact@v3
-#        with:
-#          name: 
+      - name: upload compiled pdf
+        uses: actions/upload-artifact@v3
+        with:
+          name: gravgui-manual
+          path: docs/
 
-      - name: upload pdf to repo
-        run: |
-          git config --global user.name "Hannah Mark"
-          git config --global user.email "hfmark@users.noreply.github.com"
-          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY
-          git add docs/main.pdf
-          git commit -m "update documentation"
-          git push
-        if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
