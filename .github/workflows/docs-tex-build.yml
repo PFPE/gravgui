@@ -30,7 +30,7 @@ jobs:
         run: |
           git config --global user.name "Hannah Mark"
           git config --global user.email "hmark@whoi.edu"
-          git add main.pdf
+          git add docs/main.pdf
           git commit -m "update documentation"
           git push
         if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
