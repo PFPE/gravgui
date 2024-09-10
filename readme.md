@@ -1,4 +1,7 @@
 # Gravity tie GUI for PFPE
+
+**This repository was archived in September 2024. While the code is probably still functional, it has been superseded by two other GUI options for gravity ties: an electron app coded in javascript, and a MATLAB program. Both of the new GUIs can be downloaded from the PFPE github page.**
+
 This repository contains software for computing gravity ties. The primary way to do this is with a GUI written in C++/GTK, which enables users to enter timestamped measurements of water height at the pier, upload a gravimeter data file, and compute bias relative to known station gravity. Land ties can also be computed given calibration files for the meter being used.
 
 ## Installation instructions
