@@ -18,8 +18,8 @@ The file `example.toml` shows the format of a tie that has been written out from
 
 ## TODO
 docs and docs action for build\
-releases (with chmod) instead of actions page archives\
-mac test exec - gtk and xquartz? fancier things?
+releases (with chmod?)\
+mac test exec - does it need anything fancier than brew?
 
 ### would be nice someday
 clean up filter + window function libraries\

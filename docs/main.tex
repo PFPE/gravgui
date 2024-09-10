@@ -44,6 +44,13 @@ gravgui is a C++ program using GTK3. If you read that last sentence and thought 
 \paragraph{Option 1: pre-compiled binaries}
 Pre-compiled binaries for the latest Ubuntu LTS release (22.04) and for Mac OSX (currently, 12) are available on github. Navigate to \url{https://github.com/hfmark/gravgui/releases} and download the zip archive for your operating system. Make a folder where you want to keep all of the program files, and unzip all of the contents of the archive into that folder.
 
+If you are on Mac OSX, you will also (probably) need to install the GNU C compilers and GTK3, since the binary you downloaded from github is compiled against libraries that will not otherwise be on your computer. I recommend using \href{https://brew.sh/}{homebrew} for this. Once you have homebrew set up, run the following commands in a terminal:
+\begin{verbatim}
+brew install gcc
+brew install gtk+3
+\end{verbatim}
+This should (hopefully) enable you to run the pre-compiled binary.
+
 \paragraph{Option 2: build from source}
 The source code for gravgui is available on github at \url{https://github.com/hfmark/gravgui/releases}. Download and unzip the archive, which includes all auxiliary files and a Makefile for building the program.
 
@@ -234,7 +241,7 @@ There are a few reasons why this might happen. First, it's possible that the bin
 \texttt{chmod +x gravgui.exe} (Windows) \\
 to make the program executable, and try running it again.
 
-It's also possible that your computer is missing some of the C libraries that the program expects to be able to find. In that case, try installing gcc and gtk3 by following (part of) the instructions for building from source and see if that helps.
+It's also possible that your computer is missing some of the C/GTK libraries that the program expects to be able to find. In that case, try installing gcc and gtk3 by following (part of) the instructions for building from source and see if that helps.
 
 Finally, you may be using a version of your operating system that differs significantly from the version that pre-compiled binary was compiled for. If so, you may need to build the program from source (which, luckily, should be pretty easy to do!) so that it can run on your specific computer.
 
